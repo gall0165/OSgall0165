@@ -58,319 +58,266 @@ void main(){
 
 
 //Here a couple sample SYSCALL handlers that just display a character on the screen 
-void syscall0() {
+/*void syscall0() {
     *(SCREEN+79) = ')';
 }
+*/
 
-void syscall1() {
-    *(SCREEN+78) = '(';               //?? is ( or <
-
-}
-
-void syscall2() {
-    *(SCREEN+78) = '(';                
-}
-
-void syscall3() {
-   *(SCREEN+78) = '(';    
+void syscall00() {
 
 }
 
-void syscall4() {
-    *(SCREEN+78) = '(';    
+void syscall01(){
 
 }
 
-void syscall5() {
-   *(SCREEN+78) = '(';    
+void syscall02(){
 
 }
 
-void syscall6() {
-   *(SCREEN+78) = '(';    
+
+void syscall03(){
 
 }
 
-void syscall7() {
-   *(SCREEN+78) = '(';    
+void syscall04(){
 
 }
 
-void syscall8() {
-    *(SCREEN+78) = '(';    
+void syscall05(){
 
 }
 
-void syscall9() {
-   *(SCREEN+78) = '(';    
+void syscall06(){
 
 }
 
-void syscall10() {
-   *(SCREEN+78) = '(';    
+void syscall07(){
 
 }
 
-void syscall11() {
-    *(SCREEN+78) = '(';    
+void syscall08(){
 
 }
 
-void syscall12() {
-    *(SCREEN+78) = '(';    
+void syscall09(){
 
 }
 
-void syscall13() {
-   *(SCREEN+78) = '(';    
+void syscall0A(){
 
 }
 
-void syscall14() {
-   *(SCREEN+78) = '(';    
+
+void syscall0B(){
 
 }
 
-void syscall15() {
-   *(SCREEN+78) = '(';    
-}
-
-void syscall16() {
-   *(SCREEN+78) = '(';    
+void syscall0C(){
 
 }
 
-void syscall17() {
-   *(SCREEN+78) = '(';    
+void syscall0D(){
 
 }
 
-void syscall18() {
-    *(SCREEN+78) = '(';    
+void syscall0E(){
 
 }
 
-void syscall19() {
-   *(SCREEN+78) = '(';    
+void syscall0F(){
 
 }
 
-void syscall20() {
-   *(SCREEN+78) = '(';    
+void syscall10(){
 
 }
 
-void syscall21() {
-   *(SCREEN+78) = '(';    
+void secuentr(){
 
 }
 
-void syscall22() {
-   *(SCREEN+78) = '(';    
+void securexit(){
 
 }
 
-void syscall23() {
-   *(SCREEN+78) = '(';    
+void syscall13(){
 
 }
 
-void syscall24() {
-   *(SCREEN+78) = '(';    
+void syscall14(){
 
 }
 
-void syscall25() {
-   *(SCREEN+78) = '(';    
+void syscall15(){
 
 }
 
-void syscall26() {
-   *(SCREEN+78) = '(';    
+void syscall16(){
 
 }
 
-void syscall27() {
-   *(SCREEN+78) = '(';    
+void syscall17(){
 
 }
 
-void syscall28() {
-   *(SCREEN+78) = '(';    
+void syscall18(){
 
 }
 
-void syscall29() {
-   *(SCREEN+78) = '(';    
+void syscall19(){
 
 }
 
-void syscall30() {
-    *(SCREEN+78) = '(';    
+void syscall1A(){
 
 }
 
-void syscall31() {
-   *(SCREEN+78) = '(';    
+void syscall1B(){
 
 }
 
-void syscall32() {
-   *(SCREEN+78) = '(';    
+void syscall1C(){
 
 }
 
-void syscall33() {
-   *(SCREEN+78) = '(';    
+void syscall1D(){
 
 }
 
-void syscall34() {
-   *(SCREEN+78) = '(';    
+void syscall1E(){
 
 }
 
-void syscall35() {
-   *(SCREEN+78) = '(';    
+void syscall1F(){
 
 }
 
-void syscall36() {
-   *(SCREEN+78) = '(';    
+void syscall20(){
 
 }
 
-void syscall37() {
-   *(SCREEN+78) = '(';    
+void syscall21(){
 
 }
 
-void syscall38() {
-   *(SCREEN+78) = '(';    
+void syscall22(){
 
 }
 
-void syscall39() {
-   *(SCREEN+78) = '(';    
+void syscall23(){
 
 }
 
-void syscall40() {
-   *(SCREEN+78) = '(';    
+void syscall24(){
 
 }
 
-void syscall41() {
-    *(SCREEN+78) = '(';    
+void syscall25(){
 
 }
 
-void syscall42() {
-    *(SCREEN+78) = '(';    
+void syscall26(){
 
 }
 
-void syscall43() {
-   *(SCREEN+78) = '(';    
+void syscall27(){
 
 }
 
-void syscall44() {
-    *(SCREEN+78) = '(';    
-    
-}
-
-void syscall45() {
-    *(SCREEN+78) = '(';    
+void syscall28(){
 
 }
 
-void syscall46() {
-     *(SCREEN+78) = '(';    
+void syscall29(){
 
 }
 
-void syscall47() {
-     *(SCREEN+78) = '(';    
+void syscall2A(){
 
 }
 
-void syscall48() {
-     *(SCREEN+78) = '(';    
+void syscall2B(){
 
 }
 
-void syscall49() {
-     *(SCREEN+78) = '(';    
+void syscall2C(){
 
 }
 
-void syscall50() {
-       *(SCREEN+78) = '(';    
+void syscall2D(){
 
 }
 
-void syscall51() {
-       *(SCREEN+78) = '(';    
+void syscall2E(){
 
 }
 
-void syscall52() {
-       *(SCREEN+78) = '(';    
+void syscall2F(){
 
 }
 
-void syscall53() {
-       *(SCREEN+78) = '(';    
+void syscall30(){
 
 }
 
-void syscall54() {
-       *(SCREEN+78) = '(';    
+void syscall31(){
 
 }
 
-void syscall55() {
-       *(SCREEN+78) = '(';    
+void syscall32(){
 
 }
 
-void syscall56() {
-       *(SCREEN+78) = '(';    
+void syscall33(){
 
 }
 
-void syscall57() {
-       *(SCREEN+78) = '(';    
+void syscall34(){
 
 }
 
-void syscall58() {
-       *(SCREEN+78) = '(';    
-}
-
-void syscall59() {
-       *(SCREEN+78) = '(';    
+void syscall35(){
 
 }
 
-void syscall60() {
-       *(SCREEN+78) = '(';    
+void syscall36(){
 
 }
 
-void syscall61() {
-    *   *(SCREEN+78) = '(';    
+void syscall37(){
 
 }
 
-void syscall62() {
-       *(SCREEN+78) = '(';    
+void syscall38(){
 
 }
 
-void syscall63() {
-       *(SCREEN+78) = '(';    
+void syscall39(){
+
+}
+
+void syscall3A(){
+
+}
+
+void syscall3B(){
+
+}
+
+void syscall3C(){
+
+}
+
+void syscall3D(){
+
+}
+
+void syscall3E(){
+
+}
+
+void syscall3F(){
 
 }
 
@@ -399,19 +346,25 @@ const char NOP = 0xea;
 //Each line is an instance of the struct Syscall from above, with the JMP
 //opcode value, the address of the handler routine and the NOP opcode value.
 export struct Syscall[]SYSCALLS = {
-    { JMP, &syscall0, NOP}, 
-    { JMP, &syscall1, NOP},
-    { JMP, &syscall2, NOP},
-    { JMP, &syscall3, NOP},
-    { JMP, &syscall4, NOP},
-    { JMP, &syscall5, NOP},
-    { JMP, &syscall6, NOP},
-    { JMP, &syscall7, NOP},
-    { JMP, &syscall8, NOP},
-    { JMP, &syscall9, NOP},
+    { JMP, &syscall00, NOP}, 
+    { JMP, &syscall01, NOP},
+    { JMP, &syscall02, NOP},
+    { JMP, &syscall03, NOP},
+    { JMP, &syscall04, NOP},
+    { JMP, &syscall05, NOP},
+    { JMP, &syscall06, NOP},
+    { JMP, &syscall07, NOP},
+    { JMP, &syscall08, NOP},
+    { JMP, &syscall09, NOP},
+    { JMP, &syscall0A, NOP},
+    { JMP, &syscall0B, NOP},
+    { JMP, &syscall0C, NOP},
+    { JMP, &syscall0D, NOP},
+    { JMP, &syscall0E, NOP},
+    { JMP, &syscall0F, NOP},
     { JMP, &syscall10, NOP},
-    { JMP, &syscall11, NOP},
-    { JMP, &syscall12, NOP},
+    { JMP, &securentr, NOP},
+    { JMP, &securexit, NOP},
     { JMP, &syscall13, NOP},
     { JMP, &syscall14, NOP},
     { JMP, &syscall15, NOP},
@@ -419,6 +372,11 @@ export struct Syscall[]SYSCALLS = {
     { JMP, &syscall17, NOP},
     { JMP, &syscall18, NOP},
     { JMP, &syscall19, NOP},
+    { JMP, &syscall1A, NOP},
+    { JMP, &syscall1B, NOP},
+    { JMP, &syscall1C, NOP},
+    { JMP, &syscall1D, NOP},
+    { JMP, &syscall1F, NOP},
     { JMP, &syscall20, NOP},
     { JMP, &syscall21, NOP},
     { JMP, &syscall22, NOP},
@@ -429,47 +387,35 @@ export struct Syscall[]SYSCALLS = {
     { JMP, &syscall27, NOP},
     { JMP, &syscall28, NOP},
     { JMP, &syscall29, NOP},
+    { JMP, &syscall2A, NOP},
+    { JMP, &syscall2B, NOP},
+    { JMP, &syscall2C, NOP},
+    { JMP, &syscall2D, NOP},
+    { JMP, &syscall2E, NOP},
+    { JMP, &syscall2F, NOP},
     { JMP, &syscall30, NOP},
     { JMP, &syscall31, NOP},
     { JMP, &syscall32, NOP},
-    { JMP, &syscall33, NOP},
-    { JMP, &syscall34, NOP},
-    { JMP, &syscall35, NOP},
-    { JMP, &syscall36, NOP},
-    { JMP, &syscall37, NOP},
-    { JMP, &syscall38, NOP},
-    { JMP, &syscall39, NOP},
-    { JMP, &syscall40, NOP},
-    { JMP, &syscall41, NOP},
-    { JMP, &syscall42, NOP},
-    { JMP, &syscall43, NOP},
-    { JMP, &syscall44, NOP},
-    { JMP, &syscall45, NOP},
-    { JMP, &syscall46, NOP},
-    { JMP, &syscall47, NOP},
-    { JMP, &syscall48, NOP},
-    { JMP, &syscall49, NOP},
-    { JMP, &syscall50, NOP},    
-    { JMP, &syscall51, NOP}, 
-    { JMP, &syscall52, NOP}, 
-    { JMP, &syscall53, NOP}, 
-    { JMP, &syscall54, NOP}, 
-    { JMP, &syscall55, NOP}, 
-    { JMP, &syscall56, NOP}, 
-    { JMP, &syscall57, NOP}, 
-    { JMP, &syscall58, NOP}, 
-    { JMP, &syscall59, NOP},
-    { JMP, &syscall60, NOP},  
-    { JMP, &syscall61, NOP}, 
-    { JMP, &syscall62, NOP},
-    { JMP, &syscall63, NOP}
+    { JMP, &syscall33, NOP},    
+    { JMP, &syscall34, NOP}, 
+    { JMP, &syscall35, NOP}, 
+    { JMP, &syscall36, NOP}, 
+    { JMP, &syscall37, NOP}, 
+    { JMP, &syscall38, NOP}, 
+    { JMP, &syscall39, NOP}, 
+    { JMP, &syscall3A, NOP}, 
+    { JMP, &syscall3B, NOP}, 
+    { JMP, &syscall3C, NOP},
+    { JMP, &syscall3D, NOP},  
+    { JMP, &syscall3E, NOP}, 
+    { JMP, &syscall3F, NOP}       //What about RESET and others pg 173?
 };
 
 
 //In this example we had only two SYSCALLs defined, so rather than having
 //another 62 lines, we can just ask KickC to make the TRAP table begin
 //at the next multiple of $100, i.e., at $8100.
-export align(0x100) struct Syscall[] SYSCALL_TRAPS = {
+export align(0x100) struct Syscall[] TRAPS = {
     {JMP, &RESET, NOP},
     {JMP, &PAGFAULT, NOP},
     {JMP, &RESTORKEY, NOP},
