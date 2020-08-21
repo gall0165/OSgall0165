@@ -1,0 +1,326 @@
+//*****************************
+  //Name : KickCSource
+  //Purpuse: Is a source file that provides data structures for the 
+  //SYSCALL/trap table
+//******************************
+
+//XMega65 Kernal Development Template
+//Each function of the kernal is a no-args function
+//The functions are place in the SYSCALLS table surrounded by JMP and NOP
+
+import "string"
+
+//Use a linker definition file(put the previous listing into that file)
+
+#pragma link("mega65hyper.ld")
+
+//Some definitions of address and special values that this program uses
+
+const char* RASTER = 0xd012;
+const char* VIC_MEMORY = 0xd018;
+const char* SCREEN = 0x0400;
+const char* BGCOL = 0xd021;
+const char* COLS = 0xd800;
+const char GREEN = 5;
+const char WHITE = 1;
+const char CYAN = 3;
+//Some text to display
+char[] MESSAGE = "checkpoint 2.5 by gall0165";
+
+void main(){
+		//Empty function for  now
+}
+
+void RESET(){
+    //Initialize screen memory, and select correct font
+    *VIC_MEMORY = 0x14;
+
+    //Put in a loop to make screen changes//
+    //Fill the screen with ateriscs
+    while(true){
+		  memset(SCREEN, '*' , 40*25);
+
+		  //Set the colour of every character on the screen to WHITE
+		  memset(COLS, GREEN, 40*25);
+			//put in a loop
+
+		  //Print the "checkpoint 2.5 by gall0165" MESSAGE
+		  char* sc = SCREEN+40;   //Display it one line down on the screen
+		  char* msg = MESSAGE;    //The message to display
+
+		  //A simple copy routime to copy the string
+		  while(*msg) {
+		      *sc++ = *msg++;
+    	}
+    	for(int i=0; i>30000;i++){
+    		for(int i=0; i>5;i++)continue;
+    	}
+    	  memset(SCREEN, '+' , 40*25);
+
+		  //Set the colour of every character on the screen to WHITE
+		    memset(COLS, CYAN, 40*25);
+			//put in a loop
+
+		  //Print the "checkpoint 2.5 by gall0165" MESSAGE
+		        sc = SCREEN+40;   //Display it one line down on the screen
+		        msg = MESSAGE;    //The message to display
+
+		  //A simple copy routime to copy the string
+		  while(*msg) {
+		      *sc++ = *msg++;
+    	}
+      for(int i=0; i>30000;i++){
+    		for(int i=0; i>5;i++)continue;
+    	}
+		}
+    //Loop forever showing two white lines as raster bars
+    while(true) {
+        if(*RASTER==54 || *RASTER==66) {
+            *BGCOL = GREEN;
+        }else {
+            *BGCOL = WHITE;
+        }
+    }
+}
+
+void exit_hypervisor () {
+		// Trigger exit from Hypervisor mode
+		*(unsigned char *)$D67F = $01;
+}
+
+
+//Here a couple sample SYSCALL handlers that just display a character on the screen 
+/*void syscall0() {
+    *(SCREEN+79) = ')';
+}
+*/
+
+void syscall00() {exit_hypervisor ();}
+void syscall01() {exit_hypervisor ();}
+void syscall02() {exit_hypervisor ();}
+void syscall03() {exit_hypervisor ();}
+void syscall04() {exit_hypervisor ();}
+void syscall05() {exit_hypervisor ();}
+void syscall06() {exit_hypervisor ();}
+void syscall07() {exit_hypervisor ();}
+void syscall08() {exit_hypervisor ();}
+void syscall09() {exit_hypervisor ();}
+void syscall0A() {exit_hypervisor ();}
+void syscall0B() {exit_hypervisor ();}
+void syscall0C() {exit_hypervisor ();}
+void syscall0D() {exit_hypervisor ();}
+void syscall0E() {exit_hypervisor ();}
+void syscall0F() {exit_hypervisor ();}
+void syscall10() {exit_hypervisor ();}
+void securentr() {exit_hypervisor ();}
+void securexit() {exit_hypervisor ();}
+void syscall13() {exit_hypervisor ();}
+void syscall14() {exit_hypervisor ();} 
+void syscall15() {exit_hypervisor ();}
+void syscall16() {exit_hypervisor ();}
+void syscall17() {exit_hypervisor ();}
+void syscall18() {exit_hypervisor ();}
+void syscall19() {exit_hypervisor ();}
+void syscall1A() {exit_hypervisor ();}
+void syscall1B() {exit_hypervisor ();}
+void syscall1C() {exit_hypervisor ();}
+void syscall1D() {exit_hypervisor ();}
+void syscall1E() {exit_hypervisor ();}
+void syscall1F() {exit_hypervisor ();}
+void syscall20() {exit_hypervisor ();}
+void syscall21() {exit_hypervisor ();}
+void syscall22() {exit_hypervisor ();}
+void syscall23() {exit_hypervisor ();}
+void syscall24() {exit_hypervisor ();}
+void syscall25() {exit_hypervisor ();}
+void syscall26() {exit_hypervisor ();}
+void syscall27() {exit_hypervisor ();}
+void syscall28() {exit_hypervisor ();}
+void syscall29() {exit_hypervisor ();}
+void syscall2A() {exit_hypervisor ();}
+void syscall2B() {exit_hypervisor ();}
+void syscall2C() {exit_hypervisor ();}
+void syscall2D() {exit_hypervisor ();}
+void syscall2E() {exit_hypervisor ();}
+void syscall2F() {exit_hypervisor ();}
+void syscall30() {exit_hypervisor ();}
+void syscall31() {exit_hypervisor ();}
+void syscall32() {exit_hypervisor ();}
+void syscall33() {exit_hypervisor ();}
+void syscall34() {exit_hypervisor ();}
+void syscall35() {exit_hypervisor ();}
+void syscall36() {exit_hypervisor ();}
+void syscall37() {exit_hypervisor ();}
+void syscall38() {exit_hypervisor ();}
+void syscall39() {exit_hypervisor ();}
+void syscall3A() {exit_hypervisor ();}
+void syscall3B() {exit_hypervisor ();}
+void syscall3C() {exit_hypervisor ();}
+void syscall3D() {exit_hypervisor ();}
+void syscall3E() {exit_hypervisor ();}
+void syscall3F() {exit_hypervisor ();}
+void PAGFAULT()  {exit_hypervisor ();}
+void RESTORKEY() {exit_hypervisor ();}
+void ALTTABKEY() {exit_hypervisor ();}
+void VF011RD()   {exit_hypervisor ();}
+void VF011WR()   {exit_hypervisor ();}
+void RESERVED()  {exit_hypervisor ();}
+void CPUKIL()    {exit_hypervisor ();}
+//Now we select the SYSCALL segment to hold the SYSCALL/trap entry point table.
+#pragma data_seg(Syscall)
+
+//The structure of each entry point is JMP <handler address> + NOP.
+//We have a char (xjmp) to hold the opcode for the JMP instruction,
+//and then put the address of the SYSCALL/trap handler in the next
+//two points as a pointer, and end with the NOP instruction opcode.
+struct Syscall {
+    char xjmp;          //Holds $4C, the JMP $nnn opcode
+    void()* syscall;    //Holds handler address, will be the target of the JMP
+    char xnop;          //Holds $EA, the NOP opcode
+};
+
+
+//To save writing 0x4C and 0xEA all the time, we define them as constants 
+const char JMP = 0x4C;
+const char NOP = 0xea;
+
+
+//Now we can have a nice table of up to 64 SYSCALL handlers expressed
+//in fairly readeable and easy format.
+//Each line is an instance of the struct Syscall from above, with the JMP
+//opcode value, the address of the handler routine and the NOP opcode value.
+export struct Syscall[]SYSCALLS = {
+    { JMP, &syscall00, NOP}, 
+    { JMP, &syscall01, NOP},
+    { JMP, &syscall02, NOP},
+    { JMP, &syscall03, NOP},
+    { JMP, &syscall04, NOP},
+    { JMP, &syscall05, NOP},
+    { JMP, &syscall06, NOP},
+    { JMP, &syscall07, NOP},
+    { JMP, &syscall08, NOP},
+    { JMP, &syscall09, NOP},
+    { JMP, &syscall0A, NOP},
+    { JMP, &syscall0B, NOP},
+    { JMP, &syscall0C, NOP},
+    { JMP, &syscall0D, NOP},
+    { JMP, &syscall0E, NOP},
+    { JMP, &syscall0F, NOP},
+    { JMP, &syscall10, NOP},
+    { JMP, &securentr, NOP},
+    { JMP, &securexit, NOP},
+    { JMP, &syscall13, NOP},
+    { JMP, &syscall14, NOP},
+    { JMP, &syscall15, NOP},
+    { JMP, &syscall16, NOP},
+    { JMP, &syscall17, NOP},
+    { JMP, &syscall18, NOP},
+    { JMP, &syscall19, NOP},
+    { JMP, &syscall1A, NOP},
+    { JMP, &syscall1B, NOP},
+    { JMP, &syscall1C, NOP},
+    { JMP, &syscall1D, NOP},
+    { JMP, &syscall1F, NOP},
+    { JMP, &syscall20, NOP},
+    { JMP, &syscall21, NOP},
+    { JMP, &syscall22, NOP},
+    { JMP, &syscall23, NOP},
+    { JMP, &syscall24, NOP},
+    { JMP, &syscall25, NOP},
+    { JMP, &syscall26, NOP},
+    { JMP, &syscall27, NOP},
+    { JMP, &syscall28, NOP},
+    { JMP, &syscall29, NOP},
+    { JMP, &syscall2A, NOP},
+    { JMP, &syscall2B, NOP},
+    { JMP, &syscall2C, NOP},
+    { JMP, &syscall2D, NOP},
+    { JMP, &syscall2E, NOP},
+    { JMP, &syscall2F, NOP},
+    { JMP, &syscall30, NOP},
+    { JMP, &syscall31, NOP},
+    { JMP, &syscall32, NOP},
+    { JMP, &syscall33, NOP},    
+    { JMP, &syscall34, NOP}, 
+    { JMP, &syscall35, NOP}, 
+    { JMP, &syscall36, NOP}, 
+    { JMP, &syscall37, NOP}, 
+    { JMP, &syscall38, NOP}, 
+    { JMP, &syscall39, NOP}, 
+    { JMP, &syscall3A, NOP}, 
+    { JMP, &syscall3B, NOP}, 
+    { JMP, &syscall3C, NOP},
+    { JMP, &syscall3D, NOP},  
+    { JMP, &syscall3E, NOP}, 
+    { JMP, &syscall3F, NOP}       
+};
+
+
+//In this example we had only two SYSCALLs defined, so rather than having
+//another 62 lines, we can just ask KickC to make the TRAP table begin
+//at the next multiple of $100, i.e., at $8100.
+export align(0x100) struct Syscall[] TRAPS = {
+    {JMP, &RESET, NOP},
+    {JMP, &PAGFAULT, NOP},
+    {JMP, &RESTORKEY, NOP},
+    {JMP, &ALTTABKEY, NOP},
+    {JMP, &VF011RD, NOP},
+    {JMP, &VF011WR, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &RESERVED, NOP},
+    {JMP, &CPUKIL, NOP}   
+};
