@@ -53,7 +53,7 @@ void RESET(){
 //    char* msg = MESSAGE;    //The message to display
       char* msg = message;
 
-      print_to_screen(message);
+      print_to_screen(msg);
       print_newline();
 //Loop forever showing two white lines as raster bars
     while(true) {
