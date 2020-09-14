@@ -1,0 +1,204 @@
+*********************************************************
+//Acheckpoint3.2.kc
+//3.2 Test memory Alternative
+*********************************************************
+import "string"
+
+#pragma link("mega65hyper.ld")
+
+const char* RASTER = 0xd012;
+const char* VIC_MEMORY = 0xd018;
+const char* SCREEN = 0x0400;
+const char* BGCOL = 0xd021;
+const char* COLS = 0xd800;
+const char BLACK = 0;
+const char WHITE = 1;
+
+char[] MESSAGE = " checkpoint 3.1 by gall0165";
+unsigned char *current_screen_line = $0400;
+unsigned char current_screen_x = 0;
+unsigned short men_start = $0800;
+unsigned short men_end = $0800;
+
+void main(){}
+
+
+void test_memory(){
+
+char *sc = men_start;
+char chara=$00;
+volatile unsigned char *p;
+unsigned short err=0;
+
+for (int i=0;i<30720;i++){
+
+p=sc;
+chara=$00;
+
+   for (int j=0;j<255;j++){
+
+   *p=chara;
+
+   if (*p!=chara){
+
+      print_to_screen("the memory error at $");
+      print_hex((unsigned short)p);
+      print_newline();
+      err=1;
+      break;
+   }
+
+   chara++;
+    }
+
+if (err==1) {
+
+if(men_end!=$0800) men_end-=1;
+
+break;
+}
+
+sc++;
+
+men_end=(unsigned short)sc;
+
+}
+
+   print_to_screen("memory found at $");
+   print_hex(men_start);
+   print_to_screen("- $");
+   print_hex(men_end);
+   print_newline();
+}
+
+//end test_memory fnc
+
+// print hex
+
+void print_hex(unsigned short value){
+
+char[5] hex;
+
+unsigned char i;
+
+for (i=0;i<4;i++){
+
+  if (value<0xa000) hex[i]='0'+(char)(value>>12);
+
+  else hex[i]=(char)(value>>12)-9;
+
+  value<<=4;
+
+}
+
+
+
+hex[4]=0;
+
+print_to_screen(hex);
+
+
+
+}
+
+
+
+void exit_hypervisor(){
+
+   *(unsigned char *)$D67F = $01;
+
+}
+
+
+
+void print_to_screen(char *message) {
+
+  char* sc =current_screen_line+current_screen_x;
+
+  char* msg = message;
+
+  while(*msg){
+
+    *sc++=*msg++;
+
+  current_screen_x ++;
+
+  }
+
+  while(current_screen_x>=40){
+
+     current_screen_x-=40;
+
+     current_screen_line +=1;
+
+}
+
+
+
+}
+
+
+
+void print_newline(){
+
+current_screen_line+=40;
+
+current_screen_x = 0;
+}
+
+void RESET() {
+
+  *VIC_MEMORY = 0x14;
+
+  memset(SCREEN,' ',40*25);
+
+  memset(COLS,WHITE,40*25);
+
+  char* sc =SCREEN+40;
+
+  char* msg = MESSAGE;
+
+  char[] message1 = "gall0165 operating system starting...";
+
+  char[] message2 = "testing hardware";
+
+  print_to_screen(&message1[0]);
+
+  print_newline();
+
+  print_to_screen(&message2[0]); 
+
+  print_newline();
+
+  test_memory();
+
+exit_hypervisor();
+}
+
+
+
+void syscall1(){
+
+  *(SCREEN+79) = ')';
+
+exit_hypervisor();
+
+}
+
+
+
+void syscall2() {
+
+  *(SCREEN+78)='(';
+
+exit_hypervisor();
+
+}
+
+
+
+void syscall3() {
+
+exit_hypervisor();}
+
+
