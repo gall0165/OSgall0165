@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 //*****************************
 	//Name : Work Unit 3 Hardware Bringup
 	//Checkpoint: 3.4 Detect More Devices 
@@ -10,10 +9,6 @@ import "string"
 
 //Use a linker definition file(put the previous listing into that file)
 
-=======
-import "string"
-
->>>>>>> 535878490c1a22ab76db9fc21c1082f3638db13a
 #pragma link("mega65hyper.ld")
 
 const char* RASTER = 0xd012;
@@ -39,7 +34,6 @@ void main(){}
 void test_memory(){
       char *sc = men_start;
       char chara=$00;
-<<<<<<< HEAD
       
       volatile unsigned char *p;
       unsigned short err=0;
@@ -55,21 +49,6 @@ void test_memory(){
 						   print_newline();
 						   err=1;
 						   break;
-=======
-      volatile unsigned char *p;
-      unsigned short err=0;
-      for (int i=0;i<30720;i++){
-      p=sc;
-      chara=$00;
-      for (int j=0;j<255;j++){
-      *p=chara;
-      if (*p!=chara){
-         print_to_screen("the memory error at $");
-         print_hex((unsigned short)p);
-         print_newline();
-         err=1;
-         break;
->>>>>>> 535878490c1a22ab76db9fc21c1082f3638db13a
       }
 
 chara++;
@@ -77,11 +56,7 @@ chara++;
       }
 
 if (err==1) {
-<<<<<<< HEAD
     if(men_end!=$8000) men_end-=1;
-=======
-    if(men_end!=$0800) men_end-=1;
->>>>>>> 535878490c1a22ab76db9fc21c1082f3638db13a
     break;
 }
 
@@ -103,21 +78,12 @@ men_end=(unsigned short)sc;
 
 void detect_devices(){
       unsigned short address;
-<<<<<<< HEAD
       unsigned short result=$0;														// result 0 if the device is not detected ref.esp
       unsigned short count = 0;														//the num of the address of the device ocupied
 
       for (unsigned short i=$01;i<$ff1;i+=$10){						// in 3.3 mem loc starts from $D000 to $DFFF diff dec 4080 
 
           if (i==$801) i=$c01;														//skippin range diff dec 1024 from $801 to $c01 speed ud detection process by 
-=======
-      unsigned short result=$0;
-      unsigned short count = 0;
-
-      for (unsigned short i=$01;i<$ff1;i+=$10){
-
-          if (i==$801) i=$c01;
->>>>>>> 535878490c1a22ab76db9fc21c1082f3638db13a
           address=(unsigned short)i;
           result=$0;
 
@@ -186,11 +152,7 @@ void detect_devices(){
 
 
 
-<<<<<<< HEAD
 // start Declaration of the function that detect MOS 6526 
-=======
-// detect mos6526
->>>>>>> 535878490c1a22ab76db9fc21c1082f3638db13a
 
 unsigned short detect_mos6526(unsigned short address){
 
@@ -208,7 +170,6 @@ for (unsigned short j=0;j<address;j++){
 
 unsigned long i;
 
-<<<<<<< HEAD
 if (p[$0b]<$01||p[$0b]>$23) {return $0;}								//Real Time clock offsets starts from $09 to $0b between midnigt and 1am ($01 to $23)  
 
 else {
@@ -219,18 +180,6 @@ else {
            v2=p[$09];
 
            if (v1!=v2){																	//second register has change ref.esp
-=======
-if (p[$0b]<$01||p[$0b]>$23) {return $0;}
-
-else {
-
-   v1=p[$09];
-
-   for (i=1;i<2000000;i++) {
-           v2=p[$09];
-
-           if (v1!=v2){
->>>>>>> 535878490c1a22ab76db9fc21c1082f3638db13a
 
               print_to_screen("mos6526 detected at ");
               print_hex((unsigned short)p);
@@ -268,11 +217,7 @@ v1=p[$12];
 
 for (i=1;i<1000;i++) continue;
 
-<<<<<<< HEAD
 v2=p[$12];																											//vic-ii offset $12 from its address
-=======
-v2=p[$12];
->>>>>>> 535878490c1a22ab76db9fc21c1082f3638db13a
 
 if (v1<v2){
 
@@ -282,11 +227,7 @@ if (v1<v2){
 
    print_to_screen(" --  ");
 
-<<<<<<< HEAD
    p=p+$80;																											//add $80 mem area for vic-ii 
-=======
-   p=p+$80;
->>>>>>> 535878490c1a22ab76db9fc21c1082f3638db13a
 
    print_hex((unsigned short)p);
 
@@ -415,7 +356,6 @@ void RESET() {
   char* msg = MESSAGE;
 
   char[] message1 = "gall0165 operating system starting...";
-<<<<<<< HEAD
   char[] message2 = "testing hardware";
   print_to_screen(&message1[0]);
   print_newline();
@@ -642,745 +582,4 @@ export align(0x100) struct Syscall[] TRAPS= {
  {JMP, &undefined_trap, NOP},
  {JMP, &undefined_trap, NOP},
  {JMP, &CPUKIL, NOP}
-=======
-
-  char[] message2 = "testing hardware";
-
-  print_to_screen(&message1[0]);
-
-  print_newline();
-
-  print_to_screen(&message2[0]); 
-
-  print_newline();
-
-  detect_devices();
-
-  exit_hypervisor();}
-
-
-//clean
-
-void clean(){
-
-  memset(SCREEN,' ',40*25);
-
-  memset(COLS,WHITE,40*25);
-
-}
-
-
-
-void syscall1(){
-
-  *(SCREEN+79) = ')';
-
-exit_hypervisor();
-
-}
-
-
-
-void syscall2() {
-
-  *(SCREEN+78)='(';
-
-exit_hypervisor();
-
-}
-
-
-
-void syscall3() {
-
-exit_hypervisor();}
-
-
-
-void syscall4() {
-
-exit_hypervisor();}
-
-
-
-void syscall5() {
-
-exit_hypervisor();}
-
-
-
-void syscall6() {
-
-exit_hypervisor();}
-
-
-
-void syscall7() {
-
-exit_hypervisor();}
-
-
-
-void syscall8() {
-
-exit_hypervisor();}
-
-
-
-void syscall9() {
-
-exit_hypervisor();}
-
-
-
-
-
-
-
-void syscall10() {
-
-exit_hypervisor();}
-
-
-
-void syscall11() {
-
-exit_hypervisor();}
-
-
-
-void syscall12() {
-
-exit_hypervisor();}
-
-
-
-void syscall13() {
-
-exit_hypervisor();}
-
-
-
-void syscall14() {
-
-exit_hypervisor();}
-
-
-
-void syscall15() {
-
-exit_hypervisor();}
-
-
-
-void syscall16() {
-
-exit_hypervisor();}
-
-
-
-void SECURENTR() {
-
-exit_hypervisor();}
-
-
-
-void SECUREXIT() {
-
-exit_hypervisor();}
-
-
-
-void syscall19() {
-
-exit_hypervisor();}
-
-
-
-
-
-void syscall20() {
-
-exit_hypervisor();}
-
-
-
-void syscall21() {
-
-exit_hypervisor();}
-
-
-
-void syscall22() {
-
-exit_hypervisor();}
-
-
-
-void syscall23() {
-
-exit_hypervisor();}
-
-
-
-void syscall24() {
-
-exit_hypervisor();}
-
-
-
-void syscall25() {
-
-exit_hypervisor();}
-
-
-
-void syscall26() {
-
-exit_hypervisor();}
-
-
-
-void syscall27() {
-
-exit_hypervisor();}
-
-
-
-void syscall28() {
-
-exit_hypervisor();}
-
-
-
-void syscall29() {
-
-exit_hypervisor();}
-
-
-
-
-
-void syscall30() {
-
-exit_hypervisor();}
-
-
-
-void syscall31() {
-
-exit_hypervisor();}
-
-
-
-void syscall32() {
-
-exit_hypervisor();}
-
-
-
-void syscall33() {
-
-exit_hypervisor();}
-
-
-
-void syscall34() {
-
-exit_hypervisor();}
-
-
-
-void syscall35() {
-
-exit_hypervisor();}
-
-
-
-void syscall36() {
-
-exit_hypervisor();}
-
-
-
-void syscall37() {
-
-exit_hypervisor();}
-
-
-
-void syscall38() {
-
-exit_hypervisor();}
-
-
-
-void syscall39() {
-
-exit_hypervisor();}
-
-
-
-
-
-void syscall40() {
-
-exit_hypervisor();}
-
-
-
-void syscall41() {
-
-exit_hypervisor();}
-
-
-
-void syscall42() {
-
-exit_hypervisor();}
-
-
-
-void syscall43() {
-
-exit_hypervisor();}
-
-
-
-void syscall44() {
-
-exit_hypervisor();}
-
-
-
-void syscall45() {
-
-exit_hypervisor();}
-
-
-
-void syscall46() {
-
-exit_hypervisor();}
-
-
-
-void syscall47() {
-
-exit_hypervisor();}
-
-
-
-void syscall48() {
-
-exit_hypervisor();}
-
-
-
-void syscall49() {
-
-exit_hypervisor();}
-
-
-
-
-
-void syscall50() {
-
-exit_hypervisor();}
-
-
-
-void syscall51() {
-
-exit_hypervisor();}
-
-
-
-void syscall52() {
-
-exit_hypervisor();}
-
-
-
-void syscall53() {
-
-exit_hypervisor();}
-
-
-
-void syscall54() {
-
-exit_hypervisor();}
-
-
-
-void syscall55() {
-
-exit_hypervisor();}
-
-
-
-void syscall56() {
-
-exit_hypervisor();}
-
-
-
-void syscall57() {
-
-exit_hypervisor();}
-
-
-
-void syscall58() {
-
-exit_hypervisor();}
-
-
-
-void syscall59() {
-
-exit_hypervisor();}
-
-
-
-
-
-void syscall60() {
-
-exit_hypervisor();}
-
-
-
-void syscall61() {
-
-exit_hypervisor();}
-
-
-
-void syscall62() {
-
-exit_hypervisor();}
-
-
-
-void syscall63() {
-
-exit_hypervisor();}
-
-
-
-void syscall64() {
-
-exit_hypervisor();}
-
-
-
-
-
-
-void PAGFAULT() {
-
-exit_hypervisor();}
-
-
-
-void RESTORKEY() {
-
-exit_hypervisor();}
-
-
-
-void ALTTABKEY() {
-
-exit_hypervisor();}
-
-
-
-void VF011RD() {
-
-exit_hypervisor();}
-
-
-
-void VF011WR() {
-
-exit_hypervisor();}
-
-
-
-void undefined_trap() {
-
-exit_hypervisor();}
-
-
-
-void CPUKIL() {
-
-exit_hypervisor();}
-
-
-
-
-
-#pragma data_seg(Syscall)
-
-
-
-struct SysCall {
-
-   char xjmp;
-
-   void()* syscall;
-
-   char xnop;
-
-};
-
-
-
-const char JMP = 0x4c;
-
-const char NOP = 0xea;
-
-
-
-export struct SysCall[] SYSCALLS = {
-
-{ JMP, &syscall1, NOP },
-
-{ JMP, &syscall2, NOP },
-
-{ JMP, &syscall3, NOP },
-
-{ JMP, &syscall4, NOP },
-
-{ JMP, &syscall5, NOP },
-
-{ JMP, &syscall6, NOP },
-
-{ JMP, &syscall7, NOP },
-
-{ JMP, &syscall8, NOP },
-
-{ JMP, &syscall9, NOP },
-
-{ JMP, &syscall10, NOP },
-
-{ JMP, &syscall11, NOP },
-
-{ JMP, &syscall12, NOP },
-
-{ JMP, &syscall13, NOP },
-
-{ JMP, &syscall14, NOP },
-
-{ JMP, &syscall15, NOP },
-
-{ JMP, &syscall16, NOP },
-
-{ JMP, &SECURENTR, NOP },
-
-{ JMP, &SECUREXIT, NOP },
-
-{ JMP, &syscall19, NOP },
-
-{ JMP, &syscall20, NOP },
-
-{ JMP, &syscall21, NOP },
-
-{ JMP, &syscall22, NOP },
-
-{ JMP, &syscall23, NOP },
-
-{ JMP, &syscall24, NOP },
-
-{ JMP, &syscall25, NOP },
-
-{ JMP, &syscall26, NOP },
-
-{ JMP, &syscall27, NOP },
-
-{ JMP, &syscall28, NOP },
-
-{ JMP, &syscall29, NOP },
-
-{ JMP, &syscall30, NOP },
-
-{ JMP, &syscall31, NOP },
-
-{ JMP, &syscall32, NOP },
-
-{ JMP, &syscall33, NOP },
-
-{ JMP, &syscall34, NOP },
-
-{ JMP, &syscall35, NOP },
-
-{ JMP, &syscall36, NOP },
-
-{ JMP, &syscall37, NOP },
-
-{ JMP, &syscall38, NOP },
-
-{ JMP, &syscall39, NOP },
-
-{ JMP, &syscall40, NOP },
-
-{ JMP, &syscall41, NOP },
-
-{ JMP, &syscall42, NOP },
-
-{ JMP, &syscall43, NOP },
-
-{ JMP, &syscall44, NOP },
-
-{ JMP, &syscall45, NOP },
-
-{ JMP, &syscall46, NOP },
-
-{ JMP, &syscall47, NOP },
-
-{ JMP, &syscall48, NOP },
-
-{ JMP, &syscall49, NOP },
-
-{ JMP, &syscall50, NOP },
-
-{ JMP, &syscall51, NOP },
-
-{ JMP, &syscall52, NOP },
-
-{ JMP, &syscall53, NOP },
-
-{ JMP, &syscall54, NOP },
-
-{ JMP, &syscall55, NOP },
-
-{ JMP, &syscall56, NOP },
-
-{ JMP, &syscall57, NOP },
-
-{ JMP, &syscall58, NOP },
-
-{ JMP, &syscall59, NOP },
-
-{ JMP, &syscall60, NOP },
-
-{ JMP, &syscall61, NOP },
-
-{ JMP, &syscall62, NOP },
-
-{ JMP, &syscall63, NOP },
-
-{ JMP, &syscall64, NOP }
-
-};
-
-export align(0x100) struct SysCall[] TRAPS = {
-
-
-
-
-
-{ JMP, &RESET, NOP },
-
-{ JMP, &PAGFAULT, NOP },
-
-{ JMP, &RESTORKEY, NOP },
-
-{ JMP, &ALTTABKEY, NOP },
-
-{ JMP, &VF011RD, NOP },
-
-{ JMP, &VF011WR, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &undefined_trap, NOP },
-
-{ JMP, &CPUKIL, NOP }
-
->>>>>>> 535878490c1a22ab76db9fc21c1082f3638db13a
 };

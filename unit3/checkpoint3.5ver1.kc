@@ -1,17 +1,15 @@
 //*****************************
 	//Name : Work Unit 3 Hardware Bringup
-	//Checkpoint: 3.3 Detect Devices 
-	//Purpuse: Function that detects or look for various drives on the Mega65
-	//Description: detect various drives and determines where the address in the memory located is located. 
-//******************************
-
-import "string"
-
+	//Checkpoint: 3.5 Detect even more devices & Resource Allocation 
+	//Purpuse: Function that detects other devices on the Mega65
+	//Version: Alternative 
 //******************************
 
 //XMega65 Kernal Development Template
 //Each function of the kernal is a no-args function
 //The functions are place in the SYSCALLS table surrounded by JMP and NOP
+
+import "string"
 
 //Use a linker definition file(put the previous listing into that file)
 
@@ -23,8 +21,14 @@ const char* SCREEN = 0x0400;
 const char* BGCOL = 0xd021;
 const char* COLS = 0xd800;
 const char BLACK = 0;
-const char WHITE = 1; 
+const char WHITE = 1;
+
 const char* DEVICE_START=0xd000;
+const char* DEVICE_SKIP=0xd800;
+
+const char[] MOS6526 = "mos";
+const char[] VICII = "vic"; 
+const char[] NON = "nil";
 
 char[] MESSAGE = " checkpoint 3.3 by gall0165";
 unsigned char *current_screen_line = $0400;
@@ -32,399 +36,483 @@ unsigned char current_screen_x = 0;
 unsigned short men_start = $0800;
 unsigned short men_end = $8000;
 
+
+// Device allocation structure
+
+struct device_memory_allocation{
+       unsigned short first_address;
+       unsigned short last_address;
+
+       char[] device_name;
+
+       };
+       
+
+//Device allocations array
+
+struct device_memory_allocation[16] device_memory_allocations={
+
+			{0,0,NON},{0,0,NON},{0,0,NON},{0,0,NON},{0,0,NON},{0,0,NON},
+
+			{0,0,NON},{0,0,NON},{0,0,NON},{0,0,NON},{0,0,NON},{0,0,NON},
+
+			{0,0,NON},{0,0,NON},{0,0,NON},{0,0,NON}
+
+};
+
+//define counts
+
+unsigned char counts = 0;
+
+//define allocation count
+
+unsigned char device_allocation_counts = 0;
+
 void main(){}
 
-//Start definition of the function that detects and test the memory 
+//Beggining of Function Definition call Test Memory
 void test_memory(){
-
-			char *sc = men_start;
-			char chara=$00;
-			volatile unsigned char *p;
-			unsigned short err=0;
-
-			for (int i=0;i<30720;i++)											//first loop start to the end
-			{
-			
-			p=sc;
-			chara=$00;
-
-			for (int j=0;j<255;j++)												//inside loop
-			{
-			*p=chara;
-
-			if (*p!=chara){																//catch mem loc faulty ref.esp
-
-				 print_to_screen("the memory error at $");
-				 print_hex((unsigned short)p);
-				 print_newline();
-				 err=1;
-				 break;
-			}
+      char *sc = men_start;
+      char chara=$00;
+      
+      volatile unsigned char *p;
+      unsigned short err=0;
+      //same hex and dec start from $0800 to $8000 dec )2048 to 32768) = 30720 decimal 
+      for (int i=0;i<30720;i++){
+						p=sc;
+						chara=$00;
+						for (int j=0;j<255;j++){
+						*p=chara;
+						if (*p!=chara){
+						   print_to_screen("the memory error at $");
+						   print_hex((unsigned short)p);
+						   print_newline();
+						   err=1;
+						   break;
+      }
 
 			chara++;
-			}
 
-			if (err==1) 																	// if the is an error break ref.esp
-			{
-			if(men_end!=$8000) men_end-=1;								// previous address, not futher address should be tested ref.esp
-			break;
-			}
+      }
+
+			if (err==1) {
+					if(men_end!=$8000) men_end-=1;
+					break;
+}
 
 			sc++;
 
 			men_end=(unsigned short)sc;
-			}
-				 print_to_screen("memory found at $");
-				 print_hex(men_start);
-				 print_to_screen("- $");
-				 print_hex(men_end);
-				 print_newline();
+
 }
-//End definition of the function that detects and test the memory 
 
+		 print_to_screen("memory found at $");
+		 print_hex(men_start);
+		 print_to_screen("- $");
+		 print_hex(men_end);
+		 print_newline();
 
-
-//Start definition of the detection routine for the Video Controller call VIC-II ref.esp
-char detect_vicii(unsigned short address){
-
-			volatile unsigned char* p;
-			unsigned char v1,v2;
-
-			p=DEVICE_START-1;
-
-			for (unsigned short j=0;j<address;j++){
-					
-					p++;
-			}
-
-			unsigned short i;
-
-			v1=p[$12];
-
-			for (i=1;i<1000;i++) continue;
-
-			v2=p[$12];
-
-			if (v2>v1){
-
-				 print_to_screen("vic-ii detected at ");
-
-				 print_hex((unsigned short)p);
-
-				 print_newline();
-
-				 return '1';
-			} 
-
-			else if (v1>v2) {
-				 v1=p[$12];
-
-				 for (i=1;i<1000;i++) continue;
-
-				 v2=p[$12];
-
-				 if (v2>v1){
-
-				 print_to_screen("vic-ii detected at ");
-
-				 print_hex((unsigned short)p);
-
-				 print_newline();
-
-				 return '1';																										//The device has been find at this loc ref.esp
-
-				 } else return '2';																							//The device was not found at this loc ref.esp
-
-			} else return '2';
 }
-//End definition of the detection routine for the Video Controller call VIC-II ref.esp
+//End of Function Definition call Test Memory
 
+//Begginig of Function Definition call detect_devices
 
+void detect_devices(){
+      unsigned short address;
+      unsigned short result=$0;
+      unsigned short count = 0;
 
-//Start definition of the function that detect devices any of them 
-void detect_devices()
-{
-			unsigned short address;
-			char result='0';
-
-			for (int i=1;i<4081;i+=16)
-			{
+      for (unsigned short i=$01;i<$ff1;i+=$10){
 			
-			address=(unsigned short)i;
-
-			if (result!='1') result=detect_vicii(address);						//The device has been find at this loc ref.esp
-			}
-
-
-			if (result=='2')																					//The device was not found at this loc ref.esp
 			{
-				 print_to_screen("no device found");
-				 print_newline();
-			} 
 
-			print_to_screen("finished probing for devices");
+		  unsigned char* num = DEVICE_START-1;
 
-			print_newline();
+		  for (unsigned short j=$00;j<i;j++){
+
+		      num++;
+
+		      }//print pointer position
+
+			{
+
+
+    struct device_memory_allocation *dn;
+
+    for (dn = &device_memory_allocations[0];dn<&device_memory_allocations[0]+counts;dn++){
+
+        unsigned short temp_f = dn->first_address;
+
+        unsigned short temp_l = dn->last_address;
+
+        unsigned short temp_n = (unsigned short) num;
+        
+
+        if (temp_n >= temp_f && temp_n <= temp_l) {
+
+           i+=temp_l-temp_n+$1-$10;     
+
+        }
+
+    }
+
+
+}//decide whether avoid present memory address
+
+    address=(unsigned short)i;
+
+    result=$0;
+
+    result=detect_vicii(address);
+
+
+    if (result!=$0){
+
+       count=count+1;
+
+    }
+
+    i+=result;
+
+    print_hex((unsigned short)num);
+
+    current_screen_x = 0;
+
 }
-//End definition of the function that detect devices any of them
+
+    result=$0;
+
+    result=detect_mos6526(address);
+
+    if (result!=$0){
+
+       count=count+1;
+
+    }
+
+    i+=result;
+
+}
 
 
+if (count==0){
+
+   print_to_screen("no device found");
+
+   print_newline();
+
+}
+
+ {
+
+    struct device_memory_allocation *dn;
+
+    for (dn = &device_memory_allocations[0];dn<&device_memory_allocations[0]+counts;dn++){
+
+        unsigned short temp_f = dn->first_address;
+
+        unsigned short temp_l = dn->last_address;
+
+        char[] name = dn->device_name;
+
+        print_to_screen(name);
+
+        print_to_screen(" at ");
+
+        print_hex(temp_f);
+
+        print_to_screen(" to ");
+
+        print_hex(temp_l);
+
+        print_newline();
+
+    }
+
+
+
+ } //print allocation structure
+
+print_to_screen("finished probing for devices");
+
+print_newline();
+
+}
+
+
+
+
+//mos6526 memory allocation
+
+void mos_allocation(char *p){   
+
+       device_memory_allocations[counts].device_name = MOS6526;    
+
+       device_memory_allocations[counts].first_address = (unsigned short)p;
+
+       p+=$FF;
+
+       device_memory_allocations[counts].last_address = (unsigned short)p;
+
+       counts+=1;
+
+}
+
+
+
+
+//vicii memory allocation
+
+void vicii_allocation(char *p){
+
+       device_memory_allocations[counts].device_name = VICII;    
+
+       device_memory_allocations[counts].first_address = (unsigned short)p;
+
+       device_memory_allocations[counts].last_address = (unsigned short)(p+$7f);
+
+       counts+=1;
+
+       device_memory_allocations[counts].device_name = VICII;    
+
+       device_memory_allocations[counts].first_address = (unsigned short)(p+$100);
+
+       device_memory_allocations[counts].last_address = (unsigned short)(p+$3ff);
+
+       counts+=1;
+
+       device_memory_allocations[counts].device_name = VICII;    
+
+       device_memory_allocations[counts].first_address = (unsigned short)(p+$800);
+
+       device_memory_allocations[counts].last_address = (unsigned short)(p+$bff);
+
+       counts+=1;      
+
+}
+
+
+
+
+// detect mos6526
+
+unsigned short detect_mos6526(unsigned short address){
+
+volatile unsigned char* p;
+
+unsigned char v1,v2;
+
+p=DEVICE_START-1;
+
+for (unsigned short j=0;j<address;j++){
+
+    p++;
+
+}
+
+unsigned long i;
+
+if (p[$0b]<$01||p[$0b]>$23) {return $0;}
+
+else {
+
+   v1=p[$09];
+
+   for (i=1;i<4000000;i++) {
+           v2=p[$09];
+
+           if (v1!=v2){
+
+              print_to_screen("found mos6526 ");
+
+              print_newline();
+
+              mos_allocation(p);
+
+              return $f0;
+
+       }  
+
+       
+       }
+
+   }
+
+   return $0;
+
+}
+
+// detect vicii
+
+unsigned short detect_vicii(unsigned short address){
+
+volatile unsigned char* p;
+
+unsigned char v1,v2;
+
+p=DEVICE_START-1;
+
+for (unsigned short j=0;j<address;j++){
+
+    p++;
+}
+
+unsigned short i;
+
+v1=p[$12];
+
+for (i=1;i<1000;i++) continue;
+
+v2=p[$12];
+
+if (v1<v2){
+
+   print_to_screen("found vic-ii");
+
+   vicii_allocation(p);
+
+   print_newline();
+
+   return $70;
+
+} else if (v1>v2) {
+
+   v1=p[$12];
+
+   for (i=1;i<1000;i++) continue;
+
+   v2=p[$12];
+
+   if (v1<v2){
+
+      print_to_screen("found vic-ii");
+
+      print_newline();
+
+      vicii_allocation(p);
+
+      return $70;
+
+      }else {return $0;}
+
+   } else {return $0;}
+
+}
+
+
+// print hex
 
 void print_hex(unsigned short value){
+    char[5] hex;
 
-char[5] hex;
+    unsigned char i;
 
-unsigned char i;
+    for (i=0;i<4;i++){
 
-for (i=0;i<4;i++){
+      if (value<0xa000) hex[i]='0'+(char)(value>>12);
 
-  if (value<0xa000) hex[i]='0'+(char)(value>>12);
+      else hex[i]=(char)(value>>12)-9;
 
-  else hex[i]=(char)(value>>12)-9;
+      value<<=4;
 
-  value<<=4;
 }
 
-
 hex[4]=0;
-
 print_to_screen(hex);
 
 }
 
 
+
 void exit_hypervisor(){
 
    *(unsigned char *)$D67F = $01;
+
 }
 
 
 
 void print_to_screen(char *message) {
 
-			char* sc =current_screen_line+current_screen_x;
+  char* sc =current_screen_line+current_screen_x;
 
-			char* msg = message;
+  char* msg = message;
 
-			while(*msg){
+  while(*msg){
 
-				*sc++=*msg++;
+    *sc++=*msg++;
 
-			current_screen_x ++;
+  current_screen_x ++;
 
-			}
+  }
 
-			while(current_screen_x>=40){
+  while(current_screen_x>=40){
 
-				 current_screen_x-=40;
+     current_screen_x-=40;
 
-				 current_screen_line +=1;
-		}
+     current_screen_line +=1;
+
 }
 
 
 
-void print_newline()
-{
+}
 
+
+
+void print_newline(){
 			current_screen_line+=40;
-
 			current_screen_x = 0;
 
-
-			while(current_screen_line>=(SCREEN+40*25))
-			{
-
+			while(current_screen_line>=(SCREEN+40*25)){
 			clean();
-
 			current_screen_line-=25;
 			}
 
 }
 
 
-void RESET() 
-{
-  *VIC_MEMORY = 0x14;
-
-  memset(SCREEN,' ',40*25);
-
-  memset(COLS,WHITE,40*25);
-
-  char* sc =SCREEN+40;
-
-  char* msg = MESSAGE;
-
-  char[] message1 = "gall0165 operating system starting...";
-
-  char[] message2 = "testing hardware";
-
-  print_to_screen(&message1[0]);
-
-  print_newline();
-
-  print_to_screen(&message2[0]); 
-
-  print_newline();
-
-  detect_devices();
-
-	exit_hypervisor();
-}
-
 
 
 //clean
 
 void clean(){
+		memset(SCREEN,' ',40*25);
+		memset(COLS,WHITE,40*25);
+}
 
+
+
+
+void RESET() {
+  *VIC_MEMORY = 0x14;
   memset(SCREEN,' ',40*25);
-
   memset(COLS,WHITE,40*25);
 
-}
+  char* sc =SCREEN+40;
+  char* msg = MESSAGE;
+  char[] message1 = "gall0165 operating system starting...";
+  char[] message2 = "testing hardware";
 
+  print_to_screen(&message1[0]);
+  print_newline();
+  print_to_screen(&message2[0]); 
+  print_newline();
 
-//Definition of global variables and message array
- 
-char[] MESSAGE = "gall0165 checkpoint3.3";
-unsigned char *current_screen_line = $0400;
-unsigned char current_screen_x = 0;
-unsigned short mem_start = $0800;
-unsigned short mem_end = $8000;
+  for (unsigned short k=0;k<16;k++){
+  
+      device_memory_allocations[k].first_address = $0;
+      
+      device_memory_allocations[k].last_address = $0;
+      
+      device_memory_allocations[k].device_name[0] = 0;
+  
+   }
 
-//Definition of the detection routine for the Video Controller call VIC-II ref.esp
-void detect_vicii(unsigned short address){
-	
-	// Pointer where VIC-II is suspected to be
-	volatile unsigned char *p = address;
-	unsigned char v1, v2;
-	
-	unsigned short i;
-	v1=p[$12]; 							//Read start address + $12
-	//wait at least 64 microseconds
-	for(i=1;i<1000;i++) continue;
-	v2=p[$12];							//Read again
-	if (v2>v1){
-		print_to_screen("Seems to be a VIC-II here");
-	}
-}
-
-//Definition of the function that detect devices any of them 
-void detect_devices(){
-
-	unsigned short mem_start = $D000;
-	unsigned short mem_end = $DFF0;
-	volatile unsigned char *p = $D000;
-	unsigned char value;
-
-	while(p < $DFF0){
-		*p=value;
-		do{
-		if(*p != value){
-		detect_vicii($D800);
-		print_to_screen("vic-ii detected at $");
-		print_hex((unsigned short)p);
-		print_newline();
-		print_to_screen("finished probing devices");
-		return;
-		}value++;
-		}while(value!=0);
-		p +=10;
-		}
-	print_to_screen("finished probing devices");		
-}
-
-//Definition of the function that detects and test the memory 
-void test_memory(){
-	unsigned char  value;
-	volatile unsigned char *p = $0800;	//This variable can change at any time
-  //While is ok the address is reading 1st loop is the same working with hex or dec 
-		while(p <$8000){
-			value = 0;
-			print_hex((unsigned short)p);   //  added to see the address reading please remove after test
-			current_screen_x = 0;						//  added to see the address reading please remove after test
-			
-	//If there is an error the message will pop up and tell us
-		do{
-			*p = value;
-			if(*p != value){								// 2nd loop volatile variable to test memory address ref.esp 
-				print_to_screen("memory error at $");
-				print_hex((unsigned short)p);
-				print_newline();
-				mem_end = (unsigned short)p-1;
-
-				print_to_screen("memory found at $");
-				print_hex(mem_start);
-				print_to_screen(" - $");
-				print_hex(mem_end);
-					return;
-					}	
-				value++;
-				}while(value !=0);
-				p++;
-				}
-				mem_end = $7FFF;
-				
-			print_to_screen("memory found at $");
-			print_hex(mem_start);
-			print_to_screen(" - $");
-			print_hex(mem_end);
-}
-
-//Definition of the function that display the address in hexadecimal ref.esp
-void print_hex(unsigned short value)
-{
-	char[5] hex;
-	unsigned char i;
-	for(i=0;i<4;i++){
-		if(value<0xa000) hex[i]='0'+(char)(value>>12);
-		else hex[i]=(char)(value>>12)-9;
-		value<<=4;
-		}
-	hex[4]=0;
-	print_to_screen(hex);
-}
-
-//Define the Function that copy message from the array memory to the screen location memory
-void print_to_screen(char* message){
-	char* sc = current_screen_line;
-	while(*message){
-	current_screen_line[current_screen_x]= *message;
-	message++;
-	current_screen_x++;
-	}
-}
-
-//Define the Function to move the current message line down one position
-void print_newline(){
-	current_screen_line+=40;	
-	current_screen_x = 0;
-}
-
-void exit_hypervisor(){
-	//Trigger exit from Hypervisor mode
-	*(unsigned char *)$D67F = $01;
-}
-
-void main(){}
-
-void RESET(){
-
-	*VIC_MEMORY = 0x14;	
-	memset(SCREEN,' ',40*25);
-	memset(COLS,WHITE,40*25);
-	
-	print_to_screen("gall0165 operating system starting...");
-	print_newline();
-	print_to_screen("testing hardware");
-	print_newline();
-	test_memory();
-	print_newline();
-	detect_devices();
+  detect_devices();
 	exit_hypervisor();
-}
 
+}
 
 void SYSCALL00(){exit_hypervisor();}
 void SYSCALL01(){exit_hypervisor();}

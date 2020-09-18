@@ -2,18 +2,10 @@
 	//Name : Work Unit 3 Hardware Bringup
 	//Checkpoint: 3.3 Detect Devices 
 	//Purpuse: Function that detects or look for various drives on the Mega65
-	//Description: detect various drives and determines where the address in the memory located is located. 
+	//Description: 3.3 Routines that looks for various drives on the Mega65 Computer and determines where the address in the memory located is located. 
 //******************************
 
 import "string"
-
-//******************************
-
-//XMega65 Kernal Development Template
-//Each function of the kernal is a no-args function
-//The functions are place in the SYSCALLS table surrounded by JMP and NOP
-
-//Use a linker definition file(put the previous listing into that file)
 
 #pragma link("mega65hyper.ld")
 
@@ -23,7 +15,7 @@ const char* SCREEN = 0x0400;
 const char* BGCOL = 0xd021;
 const char* COLS = 0xd800;
 const char BLACK = 0;
-const char WHITE = 1; 
+const char WHITE = 1; //
 const char* DEVICE_START=0xd000;
 
 char[] MESSAGE = " checkpoint 3.3 by gall0165";
@@ -282,147 +274,6 @@ void clean(){
 
   memset(COLS,WHITE,40*25);
 
-}
-
-
-//Definition of global variables and message array
- 
-char[] MESSAGE = "gall0165 checkpoint3.3";
-unsigned char *current_screen_line = $0400;
-unsigned char current_screen_x = 0;
-unsigned short mem_start = $0800;
-unsigned short mem_end = $8000;
-
-//Definition of the detection routine for the Video Controller call VIC-II ref.esp
-void detect_vicii(unsigned short address){
-	
-	// Pointer where VIC-II is suspected to be
-	volatile unsigned char *p = address;
-	unsigned char v1, v2;
-	
-	unsigned short i;
-	v1=p[$12]; 							//Read start address + $12
-	//wait at least 64 microseconds
-	for(i=1;i<1000;i++) continue;
-	v2=p[$12];							//Read again
-	if (v2>v1){
-		print_to_screen("Seems to be a VIC-II here");
-	}
-}
-
-//Definition of the function that detect devices any of them 
-void detect_devices(){
-
-	unsigned short mem_start = $D000;
-	unsigned short mem_end = $DFF0;
-	volatile unsigned char *p = $D000;
-	unsigned char value;
-
-	while(p < $DFF0){
-		*p=value;
-		do{
-		if(*p != value){
-		detect_vicii($D800);
-		print_to_screen("vic-ii detected at $");
-		print_hex((unsigned short)p);
-		print_newline();
-		print_to_screen("finished probing devices");
-		return;
-		}value++;
-		}while(value!=0);
-		p +=10;
-		}
-	print_to_screen("finished probing devices");		
-}
-
-//Definition of the function that detects and test the memory 
-void test_memory(){
-	unsigned char  value;
-	volatile unsigned char *p = $0800;	//This variable can change at any time
-  //While is ok the address is reading 1st loop is the same working with hex or dec 
-		while(p <$8000){
-			value = 0;
-			print_hex((unsigned short)p);   //  added to see the address reading please remove after test
-			current_screen_x = 0;						//  added to see the address reading please remove after test
-			
-	//If there is an error the message will pop up and tell us
-		do{
-			*p = value;
-			if(*p != value){								// 2nd loop volatile variable to test memory address ref.esp 
-				print_to_screen("memory error at $");
-				print_hex((unsigned short)p);
-				print_newline();
-				mem_end = (unsigned short)p-1;
-
-				print_to_screen("memory found at $");
-				print_hex(mem_start);
-				print_to_screen(" - $");
-				print_hex(mem_end);
-					return;
-					}	
-				value++;
-				}while(value !=0);
-				p++;
-				}
-				mem_end = $7FFF;
-				
-			print_to_screen("memory found at $");
-			print_hex(mem_start);
-			print_to_screen(" - $");
-			print_hex(mem_end);
-}
-
-//Definition of the function that display the address in hexadecimal ref.esp
-void print_hex(unsigned short value)
-{
-	char[5] hex;
-	unsigned char i;
-	for(i=0;i<4;i++){
-		if(value<0xa000) hex[i]='0'+(char)(value>>12);
-		else hex[i]=(char)(value>>12)-9;
-		value<<=4;
-		}
-	hex[4]=0;
-	print_to_screen(hex);
-}
-
-//Define the Function that copy message from the array memory to the screen location memory
-void print_to_screen(char* message){
-	char* sc = current_screen_line;
-	while(*message){
-	current_screen_line[current_screen_x]= *message;
-	message++;
-	current_screen_x++;
-	}
-}
-
-//Define the Function to move the current message line down one position
-void print_newline(){
-	current_screen_line+=40;	
-	current_screen_x = 0;
-}
-
-void exit_hypervisor(){
-	//Trigger exit from Hypervisor mode
-	*(unsigned char *)$D67F = $01;
-}
-
-void main(){}
-
-void RESET(){
-
-	*VIC_MEMORY = 0x14;	
-	memset(SCREEN,' ',40*25);
-	memset(COLS,WHITE,40*25);
-	
-	print_to_screen("gall0165 operating system starting...");
-	print_newline();
-	print_to_screen("testing hardware");
-	print_newline();
-	test_memory();
-	print_newline();
-	detect_devices();
-	exit_hypervisor();
 }
 
 

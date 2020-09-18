@@ -1,9 +1,9 @@
 //*****************************
 //Name : Work Unit 3 Hardware Bringup
-//Checkpoint: 3.1 Simple Text message display 
-//Purpuse: Function that display a text message on the screen
+//Checkpoint: 3.2 Test Memory 
+//Purpuse: Function that detects and test memory of the Mega65
 //******************************
-  .file [name="checkpoint3.1.bin", type="bin", segments="XMega65Bin"]
+  .file [name="checkpoint3.2.bin", type="bin", segments="XMega65Bin"]
 .segmentdef XMega65Bin [segments="Syscall, Code, Data, Stack, Zeropage"]
 .segmentdef Syscall [start=$8000, max=$81ff]
 .segmentdef Code [start=$8200, min=$8200, max=$bdff]
@@ -14,10 +14,13 @@
   .label SCREEN = $400
   .label COLS = $d800
   .const WHITE = 1
+  .const men_start = $800
   //To save writing 0x4C and 0xEA all the time, we define them as constants 
   .const JMP = $4c
   .const NOP = $ea
-  .label current_screen_line = 2
+  .label men_end = 9
+  .label current_screen_x = 2
+  .label current_screen_line = 5
 .segment Code
 main: {
     rts
@@ -338,6 +341,8 @@ RESET: {
     sta.z print_to_screen.msg
     lda #>message1
     sta.z print_to_screen.msg+1
+    lda #0
+    sta.z current_screen_x
     lda #<$400
     sta.z current_screen_line
     lda #>$400
@@ -348,8 +353,18 @@ RESET: {
     sta.z print_to_screen.msg
     lda #>message2
     sta.z print_to_screen.msg+1
+    lda #0
+    sta.z current_screen_x
     jsr print_to_screen
     jsr print_newline
+    jsr test_memory
+    lda #<message3
+    sta.z print_to_screen.msg
+    lda #>message3
+    sta.z print_to_screen.msg+1
+    lda #0
+    sta.z current_screen_x
+    jsr print_to_screen
     jsr exit_hypervisor
     rts
   .segment Data
@@ -357,41 +372,34 @@ RESET: {
     .byte 0
     message2: .text "testing hardware"
     .byte 0
+    message3: .text "finished testing hardware"
+    .byte 0
 }
 .segment Code
-//Definition of the function print a new line by advancing then cuurent to the next 
-print_newline: {
-    lda #$28
+print_to_screen: {
+    .label sc = $b
+    .label msg = $11
+    lda.z current_screen_x
     clc
     adc.z current_screen_line
-    sta.z current_screen_line
-    bcc !+
-    inc.z current_screen_line+1
-  !:
-    rts
-}
-//Definition function that write each caracter of the string
-print_to_screen: {
-    .label sc = 6
-    .label msg = 4
-    lda.z current_screen_line
     sta.z sc
-    lda.z current_screen_line+1
+    lda #0
+    adc.z current_screen_line+1
     sta.z sc+1
-    ldx #0
   __b1:
     ldy #0
     lda (msg),y
     cmp #0
     bne __b2
   __b3:
-    cpx #$28
+    lda.z current_screen_x
+    cmp #$28
     bcs __b4
     rts
   __b4:
-    //maintain the pointer to the current line as well as the position on that line ref esp
-    txa
+    lax.z current_screen_x
     axs #$28
+    stx.z current_screen_x
     inc.z current_screen_line
     bne !+
     inc.z current_screen_line+1
@@ -409,16 +417,266 @@ print_to_screen: {
     bne !+
     inc.z msg+1
   !:
-    inx
+    inc.z current_screen_x
     jmp __b1
 }
+//Start definition of the function that detects and test the memory 
+test_memory: {
+    .label p = 3
+    .label j = $11
+    .label sc = $f
+    .label i = $d
+    .label err = 7
+    lda #<0
+    sta.z p
+    sta.z p+1
+    lda #<$8000
+    sta.z men_end
+    lda #>$8000
+    sta.z men_end+1
+    lda #<0
+    sta.z err
+    sta.z err+1
+    lda #<men_start
+    sta.z sc
+    lda #>men_start
+    sta.z sc+1
+    lda #<0
+    sta.z i
+    sta.z i+1
+  __b1:
+    lda.z i
+    cmp #<$7800
+    lda.z i+1
+    sbc #>$7800
+    bvc !+
+    eor #$80
+  !:
+    bmi __b2
+  __b11:
+    lda #<message1
+    sta.z print_to_screen.msg
+    lda #>message1
+    sta.z print_to_screen.msg+1
+    lda #0
+    sta.z current_screen_x
+    jsr print_to_screen
+    lda #<men_start
+    sta.z print_hex.value
+    lda #>men_start
+    sta.z print_hex.value+1
+    jsr print_hex
+    lda #<message2
+    sta.z print_to_screen.msg
+    lda #>message2
+    sta.z print_to_screen.msg+1
+    jsr print_to_screen
+    lda.z men_end
+    sta.z print_hex.value
+    lda.z men_end+1
+    sta.z print_hex.value+1
+    jsr print_hex
+    jsr print_newline
+    rts
+  __b2:
+    lda.z p
+    sta.z print_hex.value
+    lda.z p+1
+    sta.z print_hex.value+1
+    lda #0
+    sta.z current_screen_x
+    jsr print_hex
+    //added to see the address scan
+    lda.z sc
+    sta.z p
+    lda.z sc+1
+    sta.z p+1
+    ldx #0
+    txa
+    sta.z j
+    sta.z j+1
+  __b3:
+    lda.z j
+    cmp #<$ff
+    lda.z j+1
+    sbc #>$ff
+    bvc !+
+    eor #$80
+  !:
+    bmi __b4
+  __b6:
+    lda.z err+1
+    cmp #>1
+    bne __b10
+    lda.z err
+    cmp #<1
+    bne __b10
+    lda.z men_end
+    cmp #<$8000
+    bne !+
+    lda.z men_end+1
+    cmp #>$8000
+    beq __b11
+  !:
+    lda.z men_end
+    sec
+    sbc #1
+    sta.z men_end
+    lda.z men_end+1
+    sbc #0
+    sta.z men_end+1
+    jmp __b11
+  __b10:
+    inc.z sc
+    bne !+
+    inc.z sc+1
+  !:
+    lda.z sc
+    sta.z men_end
+    lda.z sc+1
+    sta.z men_end+1
+    inc.z i
+    bne !+
+    inc.z i+1
+  !:
+    jmp __b1
+  __b4:
+    //inside loop 
+    txa
+    ldy #0
+    sta (p),y
+    txa
+    cmp (p),y
+    beq __b5
+    lda #<message
+    sta.z print_to_screen.msg
+    lda #>message
+    sta.z print_to_screen.msg+1
+    tya
+    sta.z current_screen_x
+    jsr print_to_screen
+    lda.z p
+    sta.z print_hex.value
+    lda.z p+1
+    sta.z print_hex.value+1
+    jsr print_hex
+    jsr print_newline
+    lda #<1
+    sta.z err
+    lda #>1
+    sta.z err+1
+    jmp __b6
+  __b5:
+    inx
+    inc.z j
+    bne !+
+    inc.z j+1
+  !:
+    jmp __b3
+  .segment Data
+    message: .text "the memory error at $"
+    .byte 0
+    message1: .text "memory found at $"
+    .byte 0
+    message2: .text "- $"
+    .byte 0
+}
+.segment Code
+print_newline: {
+    lda #$28
+    clc
+    adc.z current_screen_line
+    sta.z current_screen_line
+    bcc !+
+    inc.z current_screen_line+1
+  !:
+    rts
+}
+// Start print hex
+// print_hex(word zeropage($b) value)
+print_hex: {
+    .label __3 = $11
+    .label __6 = $13
+    .label value = $b
+    ldx #0
+  __b1:
+    cpx #4
+    bcc __b2
+    lda #0
+    sta hex+4
+    lda #<hex
+    sta.z print_to_screen.msg
+    lda #>hex
+    sta.z print_to_screen.msg+1
+    jsr print_to_screen
+    rts
+  __b2:
+    lda.z value+1
+    cmp #>$a000
+    bcc __b4
+    bne !+
+    lda.z value
+    cmp #<$a000
+    bcc __b4
+  !:
+    ldy #$c
+    lda.z value
+    sta.z __3
+    lda.z value+1
+    sta.z __3+1
+    cpy #0
+    beq !e+
+  !:
+    lsr.z __3+1
+    ror.z __3
+    dey
+    bne !-
+  !e:
+    lda.z __3
+    sec
+    sbc #9
+    sta hex,x
+  __b5:
+    asl.z value
+    rol.z value+1
+    asl.z value
+    rol.z value+1
+    asl.z value
+    rol.z value+1
+    asl.z value
+    rol.z value+1
+    inx
+    jmp __b1
+  __b4:
+    ldy #$c
+    lda.z value
+    sta.z __6
+    lda.z value+1
+    sta.z __6+1
+    cpy #0
+    beq !e+
+  !:
+    lsr.z __6+1
+    ror.z __6
+    dey
+    bne !-
+  !e:
+    lda.z __6
+    clc
+    adc #'0'
+    sta hex,x
+    jmp __b5
+  .segment Data
+    hex: .fill 5, 0
+}
+.segment Code
 // Copies the character c (an unsigned char) to the first num characters of the object pointed to by the argument str.
-// memset(void* zeropage(6) str, byte register(X) c, word zeropage(4) num)
+// memset(void* zeropage($f) str, byte register(X) c, word zeropage($d) num)
 memset: {
-    .label end = 4
-    .label dst = 6
-    .label num = 4
-    .label str = 6
+    .label end = $d
+    .label dst = $f
+    .label num = $d
+    .label str = $f
     lda.z num
     bne !+
     lda.z num+1

@@ -1,17 +1,14 @@
 //*****************************
 	//Name : Work Unit 3 Hardware Bringup
-	//Checkpoint: 3.3 Detect Devices 
-	//Purpuse: Function that detects or look for various drives on the Mega65
-	//Description: detect various drives and determines where the address in the memory located is located. 
-//******************************
-
-import "string"
-
+	//Checkpoint: 3.4 Detect More Devices 
+	//Purpuse: Function that detects other devices on the Mega65
 //******************************
 
 //XMega65 Kernal Development Template
 //Each function of the kernal is a no-args function
 //The functions are place in the SYSCALLS table surrounded by JMP and NOP
+
+import "string"
 
 //Use a linker definition file(put the previous listing into that file)
 
@@ -23,356 +20,92 @@ const char* SCREEN = 0x0400;
 const char* BGCOL = 0xd021;
 const char* COLS = 0xd800;
 const char BLACK = 0;
-const char WHITE = 1; 
-const char* DEVICE_START=0xd000;
+const char WHITE = 1;
 
-char[] MESSAGE = " checkpoint 3.3 by gall0165";
+char[] MESSAGE = "gall0165 checkpoint3.4";
 unsigned char *current_screen_line = $0400;
 unsigned char current_screen_x = 0;
-unsigned short men_start = $0800;
-unsigned short men_end = $8000;
 
-void main(){}
 
-//Start definition of the function that detects and test the memory 
-void test_memory(){
-
-			char *sc = men_start;
-			char chara=$00;
-			volatile unsigned char *p;
-			unsigned short err=0;
-
-			for (int i=0;i<30720;i++)											//first loop start to the end
-			{
-			
-			p=sc;
-			chara=$00;
-
-			for (int j=0;j<255;j++)												//inside loop
-			{
-			*p=chara;
-
-			if (*p!=chara){																//catch mem loc faulty ref.esp
-
-				 print_to_screen("the memory error at $");
-				 print_hex((unsigned short)p);
-				 print_newline();
-				 err=1;
-				 break;
-			}
-
-			chara++;
-			}
-
-			if (err==1) 																	// if the is an error break ref.esp
-			{
-			if(men_end!=$8000) men_end-=1;								// previous address, not futher address should be tested ref.esp
-			break;
-			}
-
-			sc++;
-
-			men_end=(unsigned short)sc;
-			}
-				 print_to_screen("memory found at $");
-				 print_hex(men_start);
-				 print_to_screen("- $");
-				 print_hex(men_end);
-				 print_newline();
-}
-//End definition of the function that detects and test the memory 
-
-
-
-//Start definition of the detection routine for the Video Controller call VIC-II ref.esp
-char detect_vicii(unsigned short address){
-
-			volatile unsigned char* p;
-			unsigned char v1,v2;
-
-			p=DEVICE_START-1;
-
-			for (unsigned short j=0;j<address;j++){
-					
-					p++;
-			}
-
-			unsigned short i;
-
-			v1=p[$12];
-
-			for (i=1;i<1000;i++) continue;
-
-			v2=p[$12];
-
-			if (v2>v1){
-
-				 print_to_screen("vic-ii detected at ");
-
-				 print_hex((unsigned short)p);
-
-				 print_newline();
-
-				 return '1';
-			} 
-
-			else if (v1>v2) {
-				 v1=p[$12];
-
-				 for (i=1;i<1000;i++) continue;
-
-				 v2=p[$12];
-
-				 if (v2>v1){
-
-				 print_to_screen("vic-ii detected at ");
-
-				 print_hex((unsigned short)p);
-
-				 print_newline();
-
-				 return '1';																										//The device has been find at this loc ref.esp
-
-				 } else return '2';																							//The device was not found at this loc ref.esp
-
-			} else return '2';
-}
-//End definition of the detection routine for the Video Controller call VIC-II ref.esp
-
-
-
-//Start definition of the function that detect devices any of them 
-void detect_devices()
-{
-			unsigned short address;
-			char result='0';
-
-			for (int i=1;i<4081;i+=16)
-			{
-			
-			address=(unsigned short)i;
-
-			if (result!='1') result=detect_vicii(address);						//The device has been find at this loc ref.esp
-			}
-
-
-			if (result=='2')																					//The device was not found at this loc ref.esp
-			{
-				 print_to_screen("no device found");
-				 print_newline();
-			} 
-
-			print_to_screen("finished probing for devices");
-
-			print_newline();
-}
-//End definition of the function that detect devices any of them
-
-
-
-void print_hex(unsigned short value){
-
-char[5] hex;
-
-unsigned char i;
-
-for (i=0;i<4;i++){
-
-  if (value<0xa000) hex[i]='0'+(char)(value>>12);
-
-  else hex[i]=(char)(value>>12)-9;
-
-  value<<=4;
-}
-
-
-hex[4]=0;
-
-print_to_screen(hex);
-
-}
-
-
-void exit_hypervisor(){
-
-   *(unsigned char *)$D67F = $01;
-}
-
-
-
-void print_to_screen(char *message) {
-
-			char* sc =current_screen_line+current_screen_x;
-
-			char* msg = message;
-
-			while(*msg){
-
-				*sc++=*msg++;
-
-			current_screen_x ++;
-
-			}
-
-			while(current_screen_x>=40){
-
-				 current_screen_x-=40;
-
-				 current_screen_line +=1;
-		}
-}
-
-
-
-void print_newline()
-{
-
-			current_screen_line+=40;
-
-			current_screen_x = 0;
-
-
-			while(current_screen_line>=(SCREEN+40*25))
-			{
-
-			clean();
-
-			current_screen_line-=25;
-			}
-
-}
-
-
-void RESET() 
-{
-  *VIC_MEMORY = 0x14;
-
-  memset(SCREEN,' ',40*25);
-
-  memset(COLS,WHITE,40*25);
-
-  char* sc =SCREEN+40;
-
-  char* msg = MESSAGE;
-
-  char[] message1 = "gall0165 operating system starting...";
-
-  char[] message2 = "testing hardware";
-
-  print_to_screen(&message1[0]);
-
-  print_newline();
-
-  print_to_screen(&message2[0]); 
-
-  print_newline();
-
-  detect_devices();
-
-	exit_hypervisor();
-}
-
-
-
-//clean
-
-void clean(){
-
-  memset(SCREEN,' ',40*25);
-
-  memset(COLS,WHITE,40*25);
-
-}
-
-
-//Definition of global variables and message array
- 
-char[] MESSAGE = "gall0165 checkpoint3.3";
-unsigned char *current_screen_line = $0400;
-unsigned char current_screen_x = 0;
-unsigned short mem_start = $0800;
-unsigned short mem_end = $8000;
-
-//Definition of the detection routine for the Video Controller call VIC-II ref.esp
-void detect_vicii(unsigned short address){
+short detect_vicii(unsigned short address){
 	
-	// Pointer where VIC-II is suspected to be
+	// POinter where VIC-II is suspected to be
 	volatile unsigned char *p = address;
 	unsigned char v1, v2;
-	
+
+	unsigned short x;
 	unsigned short i;
-	v1=p[$12]; 							//Read start address + $12
-	//wait at least 64 microseconds
+	v1=p[$12]; //Read start address + $12
+	//wait 64 microseconds
 	for(i=1;i<1000;i++) continue;
-	v2=p[$12];							//Read again
+	v2=p[$12];//Read again
 	if (v2>v1){
 		print_to_screen("Seems to be a VIC-II here");
 	}
+	x = (unsigned short)*p + 80;
+	return x;
+
+
 }
 
-//Definition of the function that detect devices any of them 
-void detect_devices(){
 
+
+void detect_devices(){
 	unsigned short mem_start = $D000;
 	unsigned short mem_end = $DFF0;
 	volatile unsigned char *p = $D000;
 	unsigned char value;
-
+	volatile unsigned short x;
 	while(p < $DFF0){
 		*p=value;
 		do{
 		if(*p != value){
-		detect_vicii($D800);
-		print_to_screen("vic-ii detected at $");
+		  detect_vicii($D080);
+		print_to_screen("vic-ii detected at $");	     
+		print_hex(mem_start);
+		print_to_screen(" -- $");
 		print_hex((unsigned short)p);
-		print_newline();
-		print_to_screen("finished probing devices");
 		return;
 		}value++;
 		}while(value!=0);
 		p +=10;
 		}
-	print_to_screen("finished probing devices");		
+	print_to_screen("finished probing devices");
+
+		
 }
 
-//Definition of the function that detects and test the memory 
+
 void test_memory(){
+	unsigned short mem_start = $0800;
+	unsigned short mem_end = $8000;
 	unsigned char  value;
-	volatile unsigned char *p = $0800;	//This variable can change at any time
-  //While is ok the address is reading 1st loop is the same working with hex or dec 
+	volatile unsigned char *p = $0800;
 		while(p <$8000){
 			value = 0;
-			print_hex((unsigned short)p);   //  added to see the address reading please remove after test
-			current_screen_x = 0;						//  added to see the address reading please remove after test
-			
-	//If there is an error the message will pop up and tell us
 		do{
 			*p = value;
-			if(*p != value){								// 2nd loop volatile variable to test memory address ref.esp 
+			if(*p != value){
 				print_to_screen("memory error at $");
 				print_hex((unsigned short)p);
 				print_newline();
 				mem_end = (unsigned short)p-1;
-
-				print_to_screen("memory found at $");
-				print_hex(mem_start);
-				print_to_screen(" - $");
-				print_hex(mem_end);
-					return;
-					}	
-				value++;
-				}while(value !=0);
-				p++;
-				}
-				mem_end = $7FFF;
-				
-			print_to_screen("memory found at $");
-			print_hex(mem_start);
-			print_to_screen(" - $");
-			print_hex(mem_end);
+		print_to_screen("memory found at $");
+		print_hex(mem_start);
+		print_to_screen(" - $");
+		print_hex(mem_end);
+			return;
+			}	
+		value++;
+		}while(value < 255);
+		p++;
+		}
+		mem_end = $7FFF;
+	print_to_screen("memory found at $");
+	print_hex(mem_start);
+	print_to_screen(" - $");
+	print_hex(mem_end);
 }
-
-//Definition of the function that display the address in hexadecimal ref.esp
 void print_hex(unsigned short value)
 {
 	char[5] hex;
@@ -384,9 +117,7 @@ void print_hex(unsigned short value)
 		}
 	hex[4]=0;
 	print_to_screen(hex);
-}
-
-//Define the Function that copy message from the array memory to the screen location memory
+	}
 void print_to_screen(char* message){
 	char* sc = current_screen_line;
 	while(*message){
@@ -395,36 +126,36 @@ void print_to_screen(char* message){
 	current_screen_x++;
 	}
 }
-
-//Define the Function to move the current message line down one position
 void print_newline(){
 	current_screen_line+=40;	
 	current_screen_x = 0;
 }
 
-void exit_hypervisor(){
+void exit_hypervisor()
+{
 	//Trigger exit from Hypervisor mode
 	*(unsigned char *)$D67F = $01;
 }
 
-void main(){}
-
 void RESET(){
-
-	*VIC_MEMORY = 0x14;	
+	*VIC_MEMORY = 0x14;
 	memset(SCREEN,' ',40*25);
 	memset(COLS,WHITE,40*25);
-	
-	print_to_screen("gall0165 operating system starting...");
-	print_newline();
-	print_to_screen("testing hardware");
-	print_newline();
-	test_memory();
-	print_newline();
-	detect_devices();
-	exit_hypervisor();
-}
 
+print_to_screen("gall0165 operating system starting...");
+print_newline();
+print_to_screen("testing hardware");
+print_newline();
+
+//test_memory();
+//print_newline();
+
+detect_devices();
+
+exit_hypervisor();
+
+}
+void main(){}
 
 void SYSCALL00(){exit_hypervisor();}
 void SYSCALL01(){exit_hypervisor();}

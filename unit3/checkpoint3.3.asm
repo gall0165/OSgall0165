@@ -1,9 +1,10 @@
 //*****************************
 //Name : Work Unit 3 Hardware Bringup
-//Checkpoint: 3.1 Simple Text message display 
-//Purpuse: Function that display a text message on the screen
+//Checkpoint: 3.3 Detect Devices 
+//Purpuse: Function that detects or look for various drives on the Mega65
+//Description: 3.3 Routines that looks for various drives on the Mega65 Computer and determines where the address in the memory located is located. 
 //******************************
-  .file [name="checkpoint3.1.bin", type="bin", segments="XMega65Bin"]
+  .file [name="checkpoint3.3.bin", type="bin", segments="XMega65Bin"]
 .segmentdef XMega65Bin [segments="Syscall, Code, Data, Stack, Zeropage"]
 .segmentdef Syscall [start=$8000, max=$81ff]
 .segmentdef Code [start=$8200, min=$8200, max=$bdff]
@@ -14,10 +15,13 @@
   .label SCREEN = $400
   .label COLS = $d800
   .const WHITE = 1
+  //
+  .label DEVICE_START = $d000
   //To save writing 0x4C and 0xEA all the time, we define them as constants 
   .const JMP = $4c
   .const NOP = $ea
-  .label current_screen_line = 2
+  .label current_screen_x = 8
+  .label current_screen_line = 6
 .segment Code
 main: {
     rts
@@ -338,6 +342,8 @@ RESET: {
     sta.z print_to_screen.msg
     lda #>message1
     sta.z print_to_screen.msg+1
+    lda #0
+    sta.z current_screen_x
     lda #<$400
     sta.z current_screen_line
     lda #>$400
@@ -348,8 +354,11 @@ RESET: {
     sta.z print_to_screen.msg
     lda #>message2
     sta.z print_to_screen.msg+1
+    lda #0
+    sta.z current_screen_x
     jsr print_to_screen
     jsr print_newline
+    jsr detect_devices
     jsr exit_hypervisor
     rts
   .segment Data
@@ -359,7 +368,213 @@ RESET: {
     .byte 0
 }
 .segment Code
-//Definition of the function print a new line by advancing then cuurent to the next 
+//Start definition of the function that detect devices any of them 
+detect_devices: {
+    .label i = 2
+    lda #0
+    sta.z current_screen_x
+    ldx #'0'
+    lda #<1
+    sta.z i
+    lda #>1
+    sta.z i+1
+  __b2:
+    lda.z i
+    cmp #<$ff1
+    lda.z i+1
+    sbc #>$ff1
+    bvc !+
+    eor #$80
+  !:
+    bmi __b3
+    cpx #'2'
+    bne __b1
+    lda #<message1
+    sta.z print_to_screen.msg
+    lda #>message1
+    sta.z print_to_screen.msg+1
+    jsr print_to_screen
+    jsr print_newline
+    lda #0
+    sta.z current_screen_x
+  __b1:
+    lda #<message
+    sta.z print_to_screen.msg
+    lda #>message
+    sta.z print_to_screen.msg+1
+    jsr print_to_screen
+    jsr print_newline
+    rts
+  __b3:
+    cpx #'1'
+    beq __b5
+    lda.z i
+    sta.z detect_vicii.address
+    lda.z i+1
+    sta.z detect_vicii.address+1
+    jsr detect_vicii
+  __b5:
+    lda.z i
+    clc
+    adc #<$10
+    sta.z i
+    lda.z i+1
+    adc #>$10
+    sta.z i+1
+    jmp __b2
+  .segment Data
+    message: .text "finished probing for devices"
+    .byte 0
+    message1: .text "no device found"
+    .byte 0
+}
+.segment Code
+//Start definition of the detection routine for the Video Controller call VIC-II ref.esp
+// detect_vicii(word zeropage($b) address)
+detect_vicii: {
+    .label p = 9
+    .label j = $e
+    .label v1 = $d
+    .label i = $10
+    .label i_4 = 4
+    .label address = $b
+    .label i_7 = 4
+    lda #<0
+    sta.z p
+    sta.z p+1
+    lda #<DEVICE_START-1
+    sta.z p
+    lda #>DEVICE_START-1
+    sta.z p+1
+    lda #<0
+    sta.z j
+    sta.z j+1
+  __b3:
+    lda.z j+1
+    cmp.z address+1
+    bcs !__b4+
+    jmp __b4
+  !__b4:
+    bne !+
+    lda.z j
+    cmp.z address
+    bcs !__b4+
+    jmp __b4
+  !__b4:
+  !:
+    ldy #$12
+    lda (p),y
+    sta.z v1
+    lda #<1
+    sta.z i
+    lda #>1
+    sta.z i+1
+  __b6:
+    lda.z i+1
+    cmp #>$3e8
+    bcs !__b8+
+    jmp __b8
+  !__b8:
+    bne !+
+    lda.z i
+    cmp #<$3e8
+    bcs !__b8+
+    jmp __b8
+  !__b8:
+  !:
+    ldy #$12
+    lda (p),y
+    cmp.z v1
+    beq !+
+    bcs __b1
+  !:
+    cmp.z v1
+    bcc __b2
+    ldx #'2'
+    rts
+  __b2:
+    ldy #$12
+    lda (p),y
+    tax
+    lda #<1
+    sta.z i_7
+    lda #>1
+    sta.z i_7+1
+  __b10:
+    lda.z i_7+1
+    cmp #>$3e8
+    bcc __b12
+    bne !+
+    lda.z i_7
+    cmp #<$3e8
+    bcc __b12
+  !:
+    ldy #$12
+    lda (p),y
+    sta.z $ff
+    cpx.z $ff
+    bcc __b13
+    ldx #'2'
+    rts
+  __b13:
+    lda #<message
+    sta.z print_to_screen.msg
+    lda #>message
+    sta.z print_to_screen.msg+1
+    jsr print_to_screen
+    lda.z p
+    sta.z print_hex.value
+    lda.z p+1
+    sta.z print_hex.value+1
+    jsr print_hex
+    jsr print_newline
+    lda #0
+    sta.z current_screen_x
+    ldx #'1'
+    rts
+  __b12:
+    inc.z i_4
+    bne !+
+    inc.z i_4+1
+  !:
+    jmp __b10
+  __b1:
+    lda #<message
+    sta.z print_to_screen.msg
+    lda #>message
+    sta.z print_to_screen.msg+1
+    jsr print_to_screen
+    lda.z p
+    sta.z print_hex.value
+    lda.z p+1
+    sta.z print_hex.value+1
+    jsr print_hex
+    jsr print_newline
+    lda #0
+    sta.z current_screen_x
+    ldx #'1'
+    rts
+  __b8:
+    inc.z i
+    bne !+
+    inc.z i+1
+  !:
+    jmp __b6
+  __b4:
+    inc.z p
+    bne !+
+    inc.z p+1
+  !:
+    inc.z j
+    bne !+
+    inc.z j+1
+  !:
+    jmp __b3
+  .segment Data
+    message: .text "vic-ii detected at "
+    .byte 0
+}
+.segment Code
 print_newline: {
     lda #$28
     clc
@@ -368,57 +583,58 @@ print_newline: {
     bcc !+
     inc.z current_screen_line+1
   !:
-    rts
-}
-//Definition function that write each caracter of the string
-print_to_screen: {
-    .label sc = 6
-    .label msg = 4
-    lda.z current_screen_line
-    sta.z sc
-    lda.z current_screen_line+1
-    sta.z sc+1
-    ldx #0
   __b1:
-    ldy #0
-    lda (msg),y
-    cmp #0
+    lda.z current_screen_line+1
+    cmp #>SCREEN+$28*$19
+    bcc !+
     bne __b2
-  __b3:
-    cpx #$28
-    bcs __b4
+    lda.z current_screen_line
+    cmp #<SCREEN+$28*$19
+    bcs __b2
+  !:
     rts
-  __b4:
-    //maintain the pointer to the current line as well as the position on that line ref esp
-    txa
-    axs #$28
-    inc.z current_screen_line
-    bne !+
-    inc.z current_screen_line+1
-  !:
-    jmp __b3
   __b2:
-    ldy #0
-    lda (msg),y
-    sta (sc),y
-    inc.z sc
-    bne !+
-    inc.z sc+1
-  !:
-    inc.z msg
-    bne !+
-    inc.z msg+1
-  !:
-    inx
+    jsr clean
+    lda.z current_screen_line
+    sec
+    sbc #<$19
+    sta.z current_screen_line
+    lda.z current_screen_line+1
+    sbc #>$19
+    sta.z current_screen_line+1
     jmp __b1
 }
+//clean
+clean: {
+    ldx #' '
+    lda #<SCREEN
+    sta.z memset.str
+    lda #>SCREEN
+    sta.z memset.str+1
+    lda #<$28*$19
+    sta.z memset.num
+    lda #>$28*$19
+    sta.z memset.num+1
+    jsr memset
+    ldx #WHITE
+    lda #<COLS
+    sta.z memset.str
+    lda #>COLS
+    sta.z memset.str+1
+    lda #<$28*$19
+    sta.z memset.num
+    lda #>$28*$19
+    sta.z memset.num+1
+    jsr memset
+    rts
+}
 // Copies the character c (an unsigned char) to the first num characters of the object pointed to by the argument str.
-// memset(void* zeropage(6) str, byte register(X) c, word zeropage(4) num)
+// memset(void* zeropage($10) str, byte register(X) c, word zeropage($e) num)
 memset: {
-    .label end = 4
-    .label dst = 6
-    .label num = 4
-    .label str = 6
+    .label end = $e
+    .label dst = $10
+    .label num = $e
+    .label str = $10
     lda.z num
     bne !+
     lda.z num+1
@@ -449,6 +665,128 @@ memset: {
     inc.z dst+1
   !:
     jmp __b2
+}
+//End definition of the function that detect devices any of them
+// print_hex(word zeropage(4) value)
+print_hex: {
+    .label __3 = $e
+    .label __6 = $10
+    .label value = 4
+    ldx #0
+  __b1:
+    cpx #4
+    bcc __b2
+    lda #0
+    sta hex+4
+    lda #<hex
+    sta.z print_to_screen.msg
+    lda #>hex
+    sta.z print_to_screen.msg+1
+    jsr print_to_screen
+    rts
+  __b2:
+    lda.z value+1
+    cmp #>$a000
+    bcc __b4
+    bne !+
+    lda.z value
+    cmp #<$a000
+    bcc __b4
+  !:
+    ldy #$c
+    lda.z value
+    sta.z __3
+    lda.z value+1
+    sta.z __3+1
+    cpy #0
+    beq !e+
+  !:
+    lsr.z __3+1
+    ror.z __3
+    dey
+    bne !-
+  !e:
+    lda.z __3
+    sec
+    sbc #9
+    sta hex,x
+  __b5:
+    asl.z value
+    rol.z value+1
+    asl.z value
+    rol.z value+1
+    asl.z value
+    rol.z value+1
+    asl.z value
+    rol.z value+1
+    inx
+    jmp __b1
+  __b4:
+    ldy #$c
+    lda.z value
+    sta.z __6
+    lda.z value+1
+    sta.z __6+1
+    cpy #0
+    beq !e+
+  !:
+    lsr.z __6+1
+    ror.z __6
+    dey
+    bne !-
+  !e:
+    lda.z __6
+    clc
+    adc #'0'
+    sta hex,x
+    jmp __b5
+  .segment Data
+    hex: .fill 5, 0
+}
+.segment Code
+print_to_screen: {
+    .label sc = $e
+    .label msg = $b
+    lda.z current_screen_x
+    clc
+    adc.z current_screen_line
+    sta.z sc
+    lda #0
+    adc.z current_screen_line+1
+    sta.z sc+1
+  __b1:
+    ldy #0
+    lda (msg),y
+    cmp #0
+    bne __b2
+  __b3:
+    lda.z current_screen_x
+    cmp #$28
+    bcs __b4
+    rts
+  __b4:
+    lax.z current_screen_x
+    axs #$28
+    stx.z current_screen_x
+    inc.z current_screen_line
+    bne !+
+    inc.z current_screen_line+1
+  !:
+    jmp __b3
+  __b2:
+    ldy #0
+    lda (msg),y
+    sta (sc),y
+    inc.z sc
+    bne !+
+    inc.z sc+1
+  !:
+    inc.z msg
+    bne !+
+    inc.z msg+1
+  !:
+    inc.z current_screen_x
+    jmp __b1
 }
 .segment Syscall
   //Now we can have a nice table of up to 64 SYSCALL handlers expressed

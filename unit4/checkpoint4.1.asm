@@ -1,9 +1,12 @@
 //*****************************
-//Name : Work Unit 3 Hardware Bringup
-//Checkpoint: 3.1 Simple Text message display 
-//Purpuse: Function that display a text message on the screen
+//Name : Work Unit 4 Aplication Binary Interface
+//Checkpoint: 4.1 Run code in the unprivileged processor mode, i.e., outside the Hypervisor Mode  
+//Unit Purpose: 1) Implemented simple Binary Interfaces that uses SYS CALLS for their implementation
+//              2) Creation of Simple Aplication Programming Interfaces to mask hardware-specific details  
+//Description: Function that copies a program from a special area of memory to place where it can be run from 
+//             to do that we are going to use the MEGA65's DMA controller 
 //******************************
-  .file [name="checkpoint3.1.bin", type="bin", segments="XMega65Bin"]
+  .file [name="checkpoint4.1.bin", type="bin", segments="XMega65Bin"]
 .segmentdef XMega65Bin [segments="Syscall, Code, Data, Stack, Zeropage"]
 .segmentdef Syscall [start=$8000, max=$81ff]
 .segmentdef Code [start=$8200, min=$8200, max=$bdff]
@@ -14,10 +17,8 @@
   .label SCREEN = $400
   .label COLS = $d800
   .const WHITE = 1
-  //To save writing 0x4C and 0xEA all the time, we define them as constants 
   .const JMP = $4c
   .const NOP = $ea
-  .label current_screen_line = 2
 .segment Code
 main: {
     rts
@@ -27,6 +28,7 @@ CPUKIL: {
     rts
 }
 exit_hypervisor: {
+    //Trigger exit from Hypervisor mode
     lda #1
     sta $d67f
     rts
@@ -312,6 +314,8 @@ SYSCALL00: {
     rts
 }
 RESET: {
+    .label sc = 4
+    .label msg = 2
     lda #$14
     sta VIC_MEMORY
     ldx #' '
@@ -334,69 +338,21 @@ RESET: {
     lda #>$28*$19
     sta.z memset.num+1
     jsr memset
-    lda #<message1
-    sta.z print_to_screen.msg
-    lda #>message1
-    sta.z print_to_screen.msg+1
-    lda #<$400
-    sta.z current_screen_line
-    lda #>$400
-    sta.z current_screen_line+1
-    jsr print_to_screen
-    jsr print_newline
-    lda #<message2
-    sta.z print_to_screen.msg
-    lda #>message2
-    sta.z print_to_screen.msg+1
-    jsr print_to_screen
-    jsr print_newline
-    jsr exit_hypervisor
-    rts
-  .segment Data
-    message1: .text "gall0165 operating system starting..."
-    .byte 0
-    message2: .text "testing hardware"
-    .byte 0
-}
-.segment Code
-//Definition of the function print a new line by advancing then cuurent to the next 
-print_newline: {
-    lda #$28
-    clc
-    adc.z current_screen_line
-    sta.z current_screen_line
-    bcc !+
-    inc.z current_screen_line+1
-  !:
-    rts
-}
-//Definition function that write each caracter of the string
-print_to_screen: {
-    .label sc = 6
-    .label msg = 4
-    lda.z current_screen_line
+    lda #<SCREEN+$28
     sta.z sc
-    lda.z current_screen_line+1
+    lda #>SCREEN+$28
     sta.z sc+1
-    ldx #0
+    lda #<MESSAGE
+    sta.z msg
+    lda #>MESSAGE
+    sta.z msg+1
   __b1:
     ldy #0
     lda (msg),y
     cmp #0
     bne __b2
-  __b3:
-    cpx #$28
-    bcs __b4
+    jsr start_simple_program
     rts
-  __b4:
-    //maintain the pointer to the current line as well as the position on that line ref esp
-    txa
-    axs #$28
-    inc.z current_screen_line
-    bne !+
-    inc.z current_screen_line+1
-  !:
-    jmp __b3
   __b2:
     ldy #0
     lda (msg),y
@@ -409,16 +365,59 @@ print_to_screen: {
     bne !+
     inc.z msg+1
   !:
-    inx
     jmp __b1
 }
+start_simple_program: {
+    lda #<$80d
+    sta $d648
+    lda #>$80d
+    sta $d648+1
+    //Telling the MEGA65 that start from address $080D in memory, assigning the address into the two bytes starting at $D648 ref.esp
+    lda #$80
+    sta $300
+    // Memo loc then values assigning to a pointer
+    lda #0
+    sta $301
+    lda #$81
+    sta $302
+    lda #0
+    sta $303
+    sta $304
+    sta $305
+    sta $306
+    lda #$60
+    sta $307
+    lda #2
+    sta $308
+    lda #0
+    sta $309
+    lda #2
+    sta $30a
+    lda #1
+    sta $30b
+    lda #8
+    sta $30c
+    lda #0
+    sta $30d
+    sta $30e
+    sta $30f
+    lda #$60
+    sta $310
+    lda #3
+    sta $d701
+    lda #0
+    sta $d702
+    sta $d705
+    jsr exit_hypervisor
+    rts
+}
 // Copies the character c (an unsigned char) to the first num characters of the object pointed to by the argument str.
-// memset(void* zeropage(6) str, byte register(X) c, word zeropage(4) num)
+// memset(void* zeropage(4) str, byte register(X) c, word zeropage(2) num)
 memset: {
-    .label end = 4
-    .label dst = 6
-    .label num = 4
-    .label str = 6
+    .label end = 2
+    .label dst = 4
+    .label num = 2
+    .label str = 4
     lda.z num
     bne !+
     lda.z num+1
@@ -450,11 +449,10 @@ memset: {
   !:
     jmp __b2
 }
+.segment Data
+  MESSAGE: .text "checkpoint 4.1  gall0165"
+  .byte 0
 .segment Syscall
-  //Now we can have a nice table of up to 64 SYSCALL handlers expressed
-  //in fairly readeable and easy format.
-  //Each line is an instance of the struct Syscall from above, with the JMP
-  //opcode value, the address of the handler routine and the NOP opcode value.
   SYSCALLS: .byte JMP
   .word SYSCALL00
   .byte NOP, JMP
@@ -584,9 +582,6 @@ memset: {
   .byte NOP, JMP
   .word SYSCALL3F
   .byte NOP
-  //In this example we had only two SYSCALLs defined, so rather than having
-  //another 62 lines, we can just ask KickC to make the TRAP table begin
-  //at the next multiple of $100, i.e., at $8100.
   .align $100
   TRAPS: .byte JMP
   .word RESET
