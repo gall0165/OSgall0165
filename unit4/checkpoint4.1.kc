@@ -1,9 +1,11 @@
 //*****************************
 	//Name : Work Unit 4 Aplication Binary Interface
 	//Checkpoint: 4.1 Run code in the unprivileged processor mode, i.e., outside the Hypervisor Mode  
-	//Unit Purpose: 1) Implemented simple Binary Interfaces that uses SYS CALLS for their implementation
+	//Unit Purpose: 
+	//              1) Implemented simple Binary Interfaces that uses SYS CALLS for their implementation
 	//              2) Creation of Simple Aplication Programming Interfaces to mask hardware-specific details  
-	//Description: Function that copies a program from a special area of memory to place where it can be run from 
+	//Description: 
+	//             Function that copies a program from a special area of memory to place where it can be run from 
 	//             to do that we are going to use the MEGA65's DMA controller 
 //******************************
 
@@ -22,7 +24,9 @@ const char WHITE = 1;
 char[] MESSAGE = "checkpoint 4.1  gall0165";
 
 void start_simple_program(){
-	*(unsigned short *)$D648 = $080D;			//Telling the MEGA65 that start from address $080D in memory, assigning the address into the two bytes starting at $D648 ref.esp
+
+  //Telling the MEGA65 that start from address $080D in memory, assigning the address into the two bytes starting at $D648 ref.esp
+	*(unsigned short *)$D648 = $080D;	     
 	*(unsigned char *)$0300 = $80;				// Memo loc then values assigning to a pointer
 	*(unsigned char *)$0301 = $00;
 	*(unsigned char *)$0302 = $81;
@@ -44,7 +48,7 @@ void start_simple_program(){
 	*(unsigned char *)$D702 = $00;
 	*(unsigned char *)$D705 = $00;
 	
-exit_hypervisor();	
+	exit_hypervisor();	
 	
 }
 

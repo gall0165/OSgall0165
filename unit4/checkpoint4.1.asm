@@ -1,9 +1,11 @@
 //*****************************
 //Name : Work Unit 4 Aplication Binary Interface
 //Checkpoint: 4.1 Run code in the unprivileged processor mode, i.e., outside the Hypervisor Mode  
-//Unit Purpose: 1) Implemented simple Binary Interfaces that uses SYS CALLS for their implementation
+//Unit Purpose: 
+//              1) Implemented simple Binary Interfaces that uses SYS CALLS for their implementation
 //              2) Creation of Simple Aplication Programming Interfaces to mask hardware-specific details  
-//Description: Function that copies a program from a special area of memory to place where it can be run from 
+//Description: 
+//             Function that copies a program from a special area of memory to place where it can be run from 
 //             to do that we are going to use the MEGA65's DMA controller 
 //******************************
   .file [name="checkpoint4.1.bin", type="bin", segments="XMega65Bin"]
@@ -368,11 +370,11 @@ RESET: {
     jmp __b1
 }
 start_simple_program: {
+    //Telling the MEGA65 that start from address $080D in memory, assigning the address into the two bytes starting at $D648 ref.esp
     lda #<$80d
     sta $d648
     lda #>$80d
     sta $d648+1
-    //Telling the MEGA65 that start from address $080D in memory, assigning the address into the two bytes starting at $D648 ref.esp
     lda #$80
     sta $300
     // Memo loc then values assigning to a pointer
