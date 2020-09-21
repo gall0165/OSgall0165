@@ -57,19 +57,18 @@ void start_simple_program(){
 
 void print_to_screen(char* message){
 
-			while(*message){
-			current_screen_line[current_screen_x]= *message;
-			message++;
-			current_screen_x++;
-			}
-
+	char* sc = current_screen_line;
+	
+	while(*message){
+	current_screen_line[current_screen_x]= *message;
+	message++;
+	current_screen_x++;
+	}
 }
 
-
 void print_newline(){
-
-		current_screen_line+=40;
-		current_screen_x = 0; 	
+	current_screen_line+=40;	
+	current_screen_x = 0;
 }
 
 void RESET(){
@@ -106,7 +105,6 @@ void SYSCALL00(){
 		print_newline();
 		print_to_screen("syscall00 entered");
 		print_newline();
-
 		exit_hypervisor();
 
 }
@@ -117,7 +115,6 @@ void SYSCALL01(){
 		print_newline();
 		print_to_screen("syscall01 entered");
 		print_newline();
-
 		exit_hypervisor();
 }
 
