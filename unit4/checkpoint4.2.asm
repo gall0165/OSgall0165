@@ -21,8 +21,8 @@
   .const WHITE = 1
   .const JMP = $4c
   .const NOP = $ea
-  .label current_screen_line = 2
-  .label current_screen_x = $a
+  .label current_screen_line = 9
+  .label current_screen_x = 4
   lda #<0
   sta.z current_screen_line
   sta.z current_screen_line+1
@@ -316,7 +316,6 @@ SYSCALL02: {
     rts
 }
 SYSCALL01: {
-    jsr print_newline
     lda #<message
     sta.z print_to_screen.message
     lda #>message
@@ -342,9 +341,9 @@ print_newline: {
     sta.z current_screen_x
     rts
 }
-// print_to_screen(byte* zeropage(4) message)
+// print_to_screen(byte* zeropage(2) message)
 print_to_screen: {
-    .label message = 4
+    .label message = 2
   __b1:
     ldy #0
     lda (message),y
@@ -364,7 +363,6 @@ print_to_screen: {
     jmp __b1
 }
 SYSCALL00: {
-    jsr print_newline
     lda #<message
     sta.z print_to_screen.message
     lda #>message
@@ -379,8 +377,6 @@ SYSCALL00: {
 }
 .segment Code
 RESET: {
-    .label sc = 8
-    .label msg = 6
     lda #<$400
     sta.z current_screen_line
     lda #>$400
@@ -409,40 +405,13 @@ RESET: {
     lda #>$28*$19
     sta.z memset.num+1
     jsr memset
-    lda #<SCREEN+$28
-    sta.z sc
-    lda #>SCREEN+$28
-    sta.z sc+1
-    lda #<MESSAGE
-    sta.z msg
-    lda #>MESSAGE
-    sta.z msg+1
-  __b1:
-    ldy #0
-    lda (msg),y
-    cmp #0
-    bne __b2
     lda #<message
     sta.z print_to_screen.message
     lda #>message
     sta.z print_to_screen.message+1
     jsr print_to_screen
-    jsr print_newline
     jsr start_simple_program
     rts
-  __b2:
-    ldy #0
-    lda (msg),y
-    sta (sc),y
-    inc.z sc
-    bne !+
-    inc.z sc+1
-  !:
-    inc.z msg
-    bne !+
-    inc.z msg+1
-  !:
-    jmp __b1
   .segment Data
     message: .text "checkpoint 4.2 gall0165"
     .byte 0
@@ -495,12 +464,12 @@ start_simple_program: {
     rts
 }
 // Copies the character c (an unsigned char) to the first num characters of the object pointed to by the argument str.
-// memset(void* zeropage(8) str, byte register(X) c, word zeropage(6) num)
+// memset(void* zeropage(7) str, byte register(X) c, word zeropage(5) num)
 memset: {
-    .label end = 6
-    .label dst = 8
-    .label num = 6
-    .label str = 8
+    .label end = 5
+    .label dst = 7
+    .label num = 5
+    .label str = 7
     lda.z num
     bne !+
     lda.z num+1
@@ -532,9 +501,6 @@ memset: {
   !:
     jmp __b2
 }
-.segment Data
-  MESSAGE: .text "checkpoint 4.2  gall0165"
-  .byte 0
 .segment Syscall
   SYSCALLS: .byte JMP
   .word SYSCALL00
