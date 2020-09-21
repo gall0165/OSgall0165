@@ -80,15 +80,15 @@ void RESET(){
 	memset(SCREEN,' ',40*25);
 	memset(COLS,WHITE,40*25);
 
-	char* sc = SCREEN+40;
-	char* msg= MESSAGE;
+	//char* sc = SCREEN+40;
+	//char* msg= MESSAGE;
 
-	while(*msg){
-	  *sc++=*msg++;
-	}
+	//while(*msg){
+	//  *sc++=*msg++;
+	//}
 
 	print_to_screen("checkpoint 4.2 gall0165");
-	print_newline();
+	//print_newline();
 	start_simple_program();
 }
 
@@ -104,7 +104,7 @@ void exit_hypervisor()
 
 void SYSCALL00(){
 
-		print_newline();
+		//print_newline();
 		print_to_screen("syscall00 entered");
 		print_newline();
 		exit_hypervisor();
@@ -114,7 +114,7 @@ void SYSCALL00(){
 
 void SYSCALL01(){
 
-		print_newline();
+		//print_newline();
 		print_to_screen("syscall01 entered");
 		print_newline();
 		exit_hypervisor();
