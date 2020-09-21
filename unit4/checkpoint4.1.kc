@@ -23,11 +23,12 @@ const char WHITE = 1;
 
 char[] MESSAGE = "checkpoint 4.1  gall0165";
 
+//function that copies a program from an special area of memory to another where it can be run from ref.esp *1.I p2  
 void start_simple_program(){
 
   //Telling the MEGA65 that start from address $080D in memory, assigning the address into the two bytes starting at $D648 ref.esp
-	*(unsigned short *)$D648 = $080D;	     
-	*(unsigned char *)$0300 = $80;				// Memo loc then values assigning to a pointer
+	*(unsigned short *)$D648 = $080D;	    //To set a program counter ($080D) for the user space ref.esp *2 p3
+	*(unsigned char *)$0300 = $80;				// Memory location then values assigning to a pointer
 	*(unsigned char *)$0301 = $00;
 	*(unsigned char *)$0302 = $81;
 	*(unsigned char *)$0303 = $00;

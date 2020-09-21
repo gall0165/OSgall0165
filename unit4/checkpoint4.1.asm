@@ -369,15 +369,17 @@ RESET: {
   !:
     jmp __b1
 }
+//function that copies a program from an special area of memory to another where it can be run from ref.esp *1.I p2  
 start_simple_program: {
     //Telling the MEGA65 that start from address $080D in memory, assigning the address into the two bytes starting at $D648 ref.esp
     lda #<$80d
     sta $d648
     lda #>$80d
     sta $d648+1
+    //To set a program counter ($080D) for the user space ref.esp *2 p3
     lda #$80
     sta $300
-    // Memo loc then values assigning to a pointer
+    // Memory location then values assigning to a pointer
     lda #0
     sta $301
     lda #$81
