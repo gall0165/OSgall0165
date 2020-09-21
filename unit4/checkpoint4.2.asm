@@ -21,8 +21,8 @@
   .const WHITE = 1
   .const JMP = $4c
   .const NOP = $ea
-  .label current_screen_line = 9
-  .label current_screen_x = 4
+  .label current_screen_line = 4
+  .label current_screen_x = $a
   lda #<0
   sta.z current_screen_line
   sta.z current_screen_line+1
@@ -316,12 +316,12 @@ SYSCALL02: {
     rts
 }
 SYSCALL01: {
+    jsr print_newline
     lda #<message
     sta.z print_to_screen.message
     lda #>message
     sta.z print_to_screen.message+1
     jsr print_to_screen
-    jsr print_newline
     jsr exit_hypervisor
     rts
   .segment Data
@@ -329,18 +329,6 @@ SYSCALL01: {
     .byte 0
 }
 .segment Code
-print_newline: {
-    lda #$28
-    clc
-    adc.z current_screen_line
-    sta.z current_screen_line
-    bcc !+
-    inc.z current_screen_line+1
-  !:
-    lda #0
-    sta.z current_screen_x
-    rts
-}
 // print_to_screen(byte* zeropage(2) message)
 print_to_screen: {
     .label message = 2
@@ -362,13 +350,25 @@ print_to_screen: {
     inc.z current_screen_x
     jmp __b1
 }
+print_newline: {
+    lda #$28
+    clc
+    adc.z current_screen_line
+    sta.z current_screen_line
+    bcc !+
+    inc.z current_screen_line+1
+  !:
+    lda #0
+    sta.z current_screen_x
+    rts
+}
 SYSCALL00: {
+    jsr print_newline
     lda #<message
     sta.z print_to_screen.message
     lda #>message
     sta.z print_to_screen.message+1
     jsr print_to_screen
-    jsr print_newline
     jsr exit_hypervisor
     rts
   .segment Data
@@ -410,6 +410,7 @@ RESET: {
     lda #>message
     sta.z print_to_screen.message+1
     jsr print_to_screen
+    jsr print_newline
     jsr start_simple_program
     rts
   .segment Data
@@ -464,12 +465,12 @@ start_simple_program: {
     rts
 }
 // Copies the character c (an unsigned char) to the first num characters of the object pointed to by the argument str.
-// memset(void* zeropage(7) str, byte register(X) c, word zeropage(5) num)
+// memset(void* zeropage(8) str, byte register(X) c, word zeropage(6) num)
 memset: {
-    .label end = 5
-    .label dst = 7
-    .label num = 5
-    .label str = 7
+    .label end = 6
+    .label dst = 8
+    .label num = 6
+    .label str = 8
     lda.z num
     bne !+
     lda.z num+1
