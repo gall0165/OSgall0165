@@ -422,6 +422,12 @@ RESET: {
     lda (msg),y
     cmp #0
     bne __b2
+    lda #<message
+    sta.z print_to_screen.message
+    lda #>message
+    sta.z print_to_screen.message+1
+    jsr print_to_screen
+    jsr print_newline
     jsr start_simple_program
     rts
   __b2:
@@ -437,7 +443,11 @@ RESET: {
     inc.z msg+1
   !:
     jmp __b1
+  .segment Data
+    message: .text "checkpoint 4.2 gall0165"
+    .byte 0
 }
+.segment Code
 //function that copies a program from an special area of memory to another where it can be run from ref.esp *1.I p2  
 start_simple_program: {
     //Telling the MEGA65 that start from address $080D in memory, assigning the address into the two bytes starting at $D648 ref.esp
