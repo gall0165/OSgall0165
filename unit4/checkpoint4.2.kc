@@ -87,6 +87,8 @@ void RESET(){
 	  *sc++=*msg++;
 	}
 
+	print_to_screen("checkpoint 4.2 gall0165");
+	print_newline();
 	start_simple_program();
 }
 
