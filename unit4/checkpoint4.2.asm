@@ -21,7 +21,7 @@
   .const WHITE = 1
   .const JMP = $4c
   .const NOP = $ea
-  .label current_screen_line = 4
+  .label current_screen_line = 8
   .label current_screen_x = $a
   lda #<0
   sta.z current_screen_line
@@ -410,7 +410,6 @@ RESET: {
     lda #>message
     sta.z print_to_screen.message+1
     jsr print_to_screen
-    jsr print_newline
     jsr start_simple_program
     rts
   .segment Data
@@ -465,12 +464,12 @@ start_simple_program: {
     rts
 }
 // Copies the character c (an unsigned char) to the first num characters of the object pointed to by the argument str.
-// memset(void* zeropage(8) str, byte register(X) c, word zeropage(6) num)
+// memset(void* zeropage(6) str, byte register(X) c, word zeropage(4) num)
 memset: {
-    .label end = 6
-    .label dst = 8
-    .label num = 6
-    .label str = 8
+    .label end = 4
+    .label dst = 6
+    .label num = 4
+    .label str = 6
     lda.z num
     bne !+
     lda.z num+1

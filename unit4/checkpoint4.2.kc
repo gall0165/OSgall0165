@@ -80,16 +80,9 @@ void RESET(){
 	memset(SCREEN,' ',40*25);
 	memset(COLS,WHITE,40*25);
 
-	//char* sc = SCREEN+40;
-	//char* msg= MESSAGE;
-
-	//while(*msg){
-	//  *sc++=*msg++;
-	//}
-
 	print_to_screen("checkpoint 4.2 gall0165");
-	print_newline();
 	start_simple_program();
+	
 }
 
 
