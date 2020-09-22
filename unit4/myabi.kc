@@ -1,0 +1,21 @@
+//Function that tells the MEGA65 retro computer to allow system calls to be made 
+void enable_syscalls(){
+		*(unsigned char *)$D02F = $47;
+		*(unsigned char *)$D02F = $53; 
+}
+
+//Function that triggers SYSCALL $00
+void call_syscall00(){
+		enable_syscalls();
+		*(unsigned char *)$D640 = $00;//writing any value
+		asm {nop}											//typically use to delay en execution or reserve space in code memory
+
+}
+
+//Function that triggers SYSCALL $01 similar like SYSCALL $00
+void call_syscall01(){
+		enable_syscalls();
+		*(unsigned char *)$D641 = $00;
+		asm {nop}											
+
+}
